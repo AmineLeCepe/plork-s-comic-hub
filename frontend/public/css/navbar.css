@@ -1,0 +1,97 @@
+.topnav {
+    display: flex;
+    flex-direction: column;  /* Stack links vertically */
+    width: 200px;            /* Set a width for the navbar */
+    background-color: #333;
+    height: 100vh;           /* Full height of the viewport */
+    position: fixed;
+    color: white;
+}
+
+.topnav a {
+    padding: 2px 24px;
+    text-decoration: none;
+    color: white;
+    display: block;
+    font-size: 16px;
+}
+
+.topnav .category {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 6px 8px;
+}
+
+.topnav a:hover {
+    background-color: #575757;
+}
+
+.topnav a.active {
+    background-color: #f6a87d;
+}
+
+.topnav-logo {
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+    display: block;
+    font-size: 18px;
+}
+
+.topnav .bottom-text {
+    margin-top: auto;           /* Pushes it to the bottom */
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #ccc;
+    text-align: center;
+}
+
+.category-icon {
+    flex-shrink: 0;
+    vertical-align: middle;
+}
+
+.category-text {
+    line-height: 1;
+}
+
+.topnav.collapsed {
+    width: 60px;
+}
+
+.topnav-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+}
+
+.menu-toggle {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.topnav.collapsed .category-text,
+.topnav.collapsed .topnav-logo,
+.topnav.collapsed .bottom-text,
+.topnav.collapsed a {
+    display: none;
+}
+
+.topnav.collapsed .category-text,
+.topnav.collapsed .topnav-logo,
+.topnav.collapsed .bottom-text,
+.topnav.collapsed a,
+.topnav.collapsed svg {
+    display: none;
+}
+
+.topnav.collapsed .topnav-header {
+    justify-content: center;
+}

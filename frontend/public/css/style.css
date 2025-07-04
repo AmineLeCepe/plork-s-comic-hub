@@ -1,0 +1,13 @@
+* {
+    font-family: "Inter", sans-serif;
+}
+
+.main-content {
+    margin-left: 200px;
+    padding: 20px;
+    background-color: #f1f1f1;
+}
+
+.topnav.collapsed ~ .main-content {
+    margin-left: 60px;
+}
