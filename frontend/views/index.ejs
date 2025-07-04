@@ -1,10 +1,26 @@
 <!doctype html>
 <html lang="en">
     <%- include("partials/head" )%>
+    <%
+        let sampleComic = {
+            name: 'Comic title'
+        }
+        let sampleChapter = {
+            title: "Chapter title",
+            description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+            number: 1,
+            pages: 40,
+            cover: "/assets/chapter-placeholder.jpeg",
+            date: Date.now()
+        }
+    %>
 <body>
     <%- include("partials/navbar") %>
     <div class="main-content">
-
+        <%- include("partials/navbar2") %>
+        <div class="currently-trending">
+            <h1>Currently trending</h1>
+        </div>
     </div>
 </body>
 </html>
