@@ -2,25 +2,95 @@
 <html lang="en">
     <%- include("partials/head" )%>
     <%
-        let sampleComic = {
-            name: 'Comic title'
+        let sampleComic1 = {
+            name: 'Comic 1',
+            tags: ["Tag 1", "Tag 2", "Tag 3"]
         }
-        let sampleChapter = {
-            title: "Chapter title",
-            description: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
+        let sampleChapter1 = {
+            title: "Chapter 1",
+            description: "Placeholder desc",
+            number: 1,
+            pages: 40,
+            cover: "/assets/chapter-placeholder.jpeg",
+            date: Date.now()
+        }
+
+        let sampleComic2 = {
+            name: 'Comic 2',
+            tags: ["Tag 1", "Tag 2", "Tag 3"]
+        }
+        let sampleChapter2 = {
+            title: "Chapter 2",
+            description: "Placeholder desc 2",
             number: 1,
             pages: 40,
             cover: "/assets/chapter-placeholder.jpeg",
             date: Date.now()
         }
     %>
+
 <body>
     <%- include("partials/navbar") %>
     <div class="main-content">
         <%- include("partials/navbar2") %>
         <div class="currently-trending">
             <h1>Currently trending</h1>
+
+            <div class="carousel-container">
+                <button class="carousel-btn prev">‹</button>
+
+                <div class="carousel-track">
+                    <%
+                    let sampleData = [
+                        {comic: sampleComic1, chapter: sampleChapter1},
+                        {comic: sampleComic2, chapter: sampleChapter2}
+                    ];
+
+                            for(let item of sampleData) {
+                    %>
+                        <div class="carousel-item">
+                            <img src="<%= item.chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail"/>
+                            <div class="chapter-info">
+                                <h3 class="comic-name"><%= item.comic.name %></h3>
+                                <h5 class="tags">
+                                    <% for(let tag of item.comic.tags) { %>
+                                        <span class="tag"><%= tag %></span>
+                                    <% } %>
+                                </h5>
+                                <h4 class="chapter-title"><%= item.chapter.number%>. <%= item.chapter.title %></h4>
+                                <p class="chapter-description"><%= item.chapter.description %></p>
+                                <span class="chapter-date">Released: <%= new Date(item.chapter.date).toLocaleDateString() %></span>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+
+                <button class="carousel-btn next">›</button>
+            </div>
         </div>
     </div>
+
+
+    <script>
+        let index = 0;
+        const track = document.querySelector('.carousel-track');
+        const items = document.querySelectorAll('.carousel-item');
+        const totalItems = items.length;
+
+        // Function to update the carousel position
+        function updateCarousel() {
+            track.style.transform = `translateX(-${index * 100}%)`;
+        }
+
+        document.querySelector('.carousel-btn.next').onclick = () => {
+            index = (index + 1) % totalItems; // Loop back to the first item after the last one
+            updateCarousel();
+        };
+
+        document.querySelector('.carousel-btn.prev').onclick = () => {
+            index = (index - 1 + totalItems) % totalItems; // Loop to the last item when going back from the first one
+            updateCarousel();
+        };
+    </script>
 </body>
 </html>
