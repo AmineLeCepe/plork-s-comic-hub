@@ -8,7 +8,7 @@
         }
         let sampleChapter1 = {
             title: "Chapter 1",
-            description: "Placeholder desc",
+            description: "Let me begin this post by stating how much i hate every single one of you. How much i despise the very fact of your existence.",
             number: 1,
             pages: 40,
             cover: "/assets/chapter-placeholder.jpeg",
@@ -54,7 +54,7 @@
                                 <h3 class="comic-name"><%= item.comic.name %></h3>
                                 <h5 class="tags">
                                     <% for(let tag of item.comic.tags) { %>
-                                        <span class="tag"><%= tag %></span>
+                                        <span class="tag"><%= tag.toUpperCase() %></span>
                                     <% } %>
                                 </h5>
                                 <h4 class="chapter-title"><%= item.chapter.number%>. <%= item.chapter.title %></h4>

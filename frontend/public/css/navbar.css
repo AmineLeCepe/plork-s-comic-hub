@@ -1,3 +1,4 @@
+
 .topnav {
     display: flex;
     flex-direction: column;  /* Stack links vertically */
@@ -60,7 +61,7 @@
 }
 
 .topnav.collapsed {
-    width: 60px;
+    width: 50px;
 }
 
 .topnav-header {

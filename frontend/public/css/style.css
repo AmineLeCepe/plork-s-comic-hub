@@ -6,6 +6,7 @@
     margin-left: 200px;
     padding: 20px;
     background-color: #f1f1f1;
+    transition: margin-left 0.3s ease, transform 0.3s ease;
 }
 
 .main-content .currently-trending h1 {
@@ -20,6 +21,7 @@
 
 .topnav.collapsed ~ .main-content {
     margin-left: 60px;
+    transform: translateX(-10px);
 }
 
 .main-content-layout {
@@ -68,6 +70,7 @@
     flex-direction: column;
     justify-content: center;
     flex: 1;
+    position: relative;
 }
 
 .carousel-btn {
@@ -93,5 +96,35 @@
     padding: 20px;
     background-color: #fff;
     border-radius: 10px;
+}
+
+.comic-name {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.tags {
+    margin-bottom: 15px;
+    font-size: 0.8rem;
+}
+
+.tag {
+    background-color: #2c2c2c;
+    color: white;
+    padding: 4px 8px;
+    font-weight: bold;
+    border-radius: 6px;
+}
+.chapter-title {
+    font-weight: bold;
+    font-style: italic;
+}
+
+.chapter-date {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    font-size: 0.8rem;
+    color: #666;
 }
 
