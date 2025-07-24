@@ -20,6 +20,16 @@
     margin: 20px;
 }
 
+.main-content .latest h1 {
+    font-weight: bold;
+    font-size: 1.75rem;
+    padding-left: 20px;
+}
+
+.main-content .latest {
+    padding: 20px;
+    margin: 20px;
+}
 
 .topnav.collapsed ~ .main-content {
     margin-left: 60px;
@@ -130,3 +140,108 @@
     color: #666;
 }
 
+/* Latest section layout - updated for responsiveness */
+.latest-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns by default */
+    gap: 20px; /* Space between columns */
+    padding: 20px;
+}
+
+/* Column styling */
+.latest-column {
+    background-color: #333;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+/* Chapter item styling for the latest section */
+.latest-chapter-item {
+    background-color: #444; /* Gray background */
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white; /* White text color */
+}
+
+.latest-chapter-item .chapter-header {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+}
+
+.latest-chapter-item .chapter-thumbnail-small {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.latest-chapter-item .chapter-info-small {
+    padding: 0 10px;
+    flex: 1;
+}
+
+.latest-chapter-item .comic-name-small {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: white; /* Ensure white text color */
+}
+
+.latest-chapter-item .chapter-title-small {
+    font-size: 0.8rem;
+    margin: 5px 0 0 0;
+    font-style: italic;
+    color: #ddd; /* Slightly softer white for secondary text */
+}
+
+.latest-chapter-item .chapter-date-small {
+    font-size: 0.7rem;
+    color: #bbb; /* Light gray for tertiary text */
+    display: block;
+    margin-top: 5px;
+}
+
+/* Responsive adjustments for medium screens */
+@media screen and (max-width: 992px) {
+    .latest-container {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns on medium screens */
+    }
+}
+
+/* Responsive adjustments for small screens */
+@media screen and (max-width: 576px) {
+    .latest-container {
+        grid-template-columns: 1fr; /* Single column on mobile */
+    }
+    
+    /* Additional mobile styling adjustments */
+    .main-content {
+        margin-left: 0; /* Full width when sidebar is collapsed/hidden on mobile */
+        padding: 10px;
+    }
+    
+    .latest, .currently-trending {
+        padding: 10px;
+        margin: 10px;
+    }
+    
+    .latest h1, .currently-trending h1 {
+        padding-left: 10px;
+        font-size: 1.5rem;
+    }
+}
+
+/* Add responsive adjustments for the navbar toggle as well */
+@media screen and (max-width: 768px) {
+    .topnav ~ .main-content {
+        margin-left: 60px; /* Always collapsed sidebar width on smaller screens */
+    }
+}

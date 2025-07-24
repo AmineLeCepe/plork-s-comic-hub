@@ -11,7 +11,7 @@
             description: "Placeholder desc",
             number: 1,
             pages: 40,
-            cover: "/assets/chapter-placeholder.jpeg",
+            cover: "/assets/chapter-placeholder.png",
             date: Date.now()
         }
 
@@ -24,7 +24,7 @@
             description: "Placeholder desc 2",
             number: 1,
             pages: 40,
-            cover: "/assets/chapter-placeholder.jpeg",
+            cover: "/assets/chapter-placeholder.png",
             date: Date.now()
         }
     %>
@@ -34,7 +34,7 @@
     <div class="main-content">
         <%- include("partials/navbar2") %>
         <div class="currently-trending">
-            <h1>Currently trending</h1>
+            <h1>Currently Trending</h1>
 
             <div class="carousel-container">
                 <button class="carousel-btn prev">‹</button>
@@ -66,6 +66,94 @@
                 </div>
 
                 <button class="carousel-btn next">›</button>
+            </div>
+        </div>
+        <div class="latest">
+            <h1>Latest Releases</h1>
+            <div class="latest-container">
+                <!-- Column 1 -->
+                <div class="latest-column">
+                    <% 
+                    // Create sample data for the first column
+                    for(let i = 0; i < 4; i++) { 
+                        let chapter = {
+                            title: `Chapter ${i+1}`,
+                            number: i+1,
+                            cover: "/assets/chapter-placeholder.png",
+                            date: Date.now() - (i * 86400000) // One day earlier for each item
+                        };
+                        let comic = {
+                            name: `Sample Comic ${i+1}`
+                        };
+                    %>
+                        <div class="latest-chapter-item">
+                            <div class="chapter-header">
+                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                <div class="chapter-info-small">
+                                    <h4 class="comic-name-small"><%= comic.name %></h4>
+                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
+                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Column 2 -->
+                <div class="latest-column">
+                    <% 
+                    // Create sample data for the second column
+                    for(let i = 4; i < 8; i++) { 
+                        let chapter = {
+                            title: `Chapter ${i+1}`,
+                            number: i+1,
+                            cover: "/assets/chapter-placeholder.png",
+                            date: Date.now() - (i * 86400000)
+                        };
+                        let comic = {
+                            name: `Sample Comic ${i+1}`
+                        };
+                    %>
+                        <div class="latest-chapter-item">
+                            <div class="chapter-header">
+                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                <div class="chapter-info-small">
+                                    <h4 class="comic-name-small"><%= comic.name %></h4>
+                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
+                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
+                
+                <!-- Column 3 -->
+                <div class="latest-column">
+                    <% 
+                    // Create sample data for the third column
+                    for(let i = 8; i < 12; i++) { 
+                        let chapter = {
+                            title: `Chapter ${i+1}`,
+                            number: i+1,
+                            cover: "/assets/chapter-placeholder.png",
+                            date: Date.now() - (i * 86400000)
+                        };
+                        let comic = {
+                            name: `Sample Comic ${i+1}`
+                        };
+                    %>
+                        <div class="latest-chapter-item">
+                            <div class="chapter-header">
+                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                <div class="chapter-info-small">
+                                    <h4 class="comic-name-small"><%= comic.name %></h4>
+                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
+                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                </div>
             </div>
         </div>
     </div>
