@@ -16,6 +16,12 @@ app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
 })
 
+// Routes
+
 app.get("/", (req, res) => {
     res.render("index");
+})
+
+app.get("/profile", (req, res) => {
+    res.render("profile");
 })

@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<link rel="stylesheet" href="/css/profile.css">
+    <%- include("partials/head" )%>
+    <body>
+    <%- include("partials/navbar") %>
+    <div class="main-content">
+        <%- include("partials/navbar2") %>
+        <div class="profile-content">
+            <div class="profile-left">
+                <div class="profile-image-container">
+                    <img src="/assets/default-avatar.png" alt="Profile Picture" class="profile-image">
+                </div>
+                <div class="profile-username">
+                    <h2>Username</h2>
+                </div>
+                <button class="report-button">Report User</button>
+            </div>
+            <div class="profile-right">
+                <div class="profile-info-item">
+                    <span class="info-label">Connections:</span>
+                    <span class="info-value">0 connected accounts</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="info-label">User ID:</span>
+                    <span class="info-value">N/A</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="info-label">Roles:</span>
+                    <span class="info-value">Role 1</span>
+                </div>
+                <div class="profile-info-item">
+                    <span class="info-label">Uploads:</span>
+                    <span class="info-value">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    </body>
+</html>

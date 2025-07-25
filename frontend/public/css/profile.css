@@ -1,0 +1,101 @@
+/* Profile page styles */
+.profile-content {
+    display: flex;
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 30px;
+    margin: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.profile-left {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 30px;
+    border-right: 1px solid #eee;
+}
+
+.profile-right {
+    flex: 2;
+    padding-left: 30px;
+}
+
+.profile-image-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-username {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.profile-username h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.report-button {
+    background-color: #444444;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.3s;
+}
+
+.report-button:hover {
+    background-color: #333333;
+}
+
+.profile-info-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.info-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 100px;
+    color: #555;
+}
+
+.info-value {
+    color: #333;
+}
+
+/* Responsive adjustments for profile page */
+@media screen and (max-width: 768px) {
+    .profile-content {
+        flex-direction: column;
+        padding: 20px;
+    }
+
+    .profile-left {
+        border-right: none;
+        border-bottom: 1px solid #eee;
+        padding-right: 0;
+        padding-bottom: 20px;
+        margin-bottom: 20px;
+    }
+
+    .profile-right {
+        padding-left: 0;
+    }
+}
