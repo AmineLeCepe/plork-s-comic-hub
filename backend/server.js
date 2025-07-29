@@ -1,9 +1,16 @@
 // Dependencies
 const express = require('express');
 const path = require('path');
+const connectDB = require('./config/mongodb');
+const mongoose = require("mongoose");
 require('dotenv').config();
 
+// Database imports
+const models = require('./models');
+
+// App config
 const app = express();
+connectDB();
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
