@@ -32,3 +32,7 @@ app.get("/", (req, res) => {
 app.get("/profile", (req, res) => {
     res.render("profile");
 })
+
+app.get("/signup", (req, res) => {
+    res.render("signup");
+})
