@@ -1,28 +1,4 @@
-# Classes
-## Comic
-* Name
-* Description
-* Language
-* Additional links
-* Authors
-* Image
-* Tags
-* Date
-* View count(?)
-* Favorites(?)
-* Comments(?)
-## Chapter
-* Title
-* Number
-* Pages
-* Cover
-* Date
-* View count(?)
-* Favorites(?)
-* Comments(?)
-# Specifics
-## Dimensions
-- Covers: 2480x3425
-- Double spreads: 4200x3150
-# Issues
-- Fix main content overlap on collapsing the side navbar
+- Recaptcha for signing up/logging in 
+- Change user modal on 2nd navbar depending on whether the user is logged in or not
+- Restrict access to login/sign up pages for already logged in users
+- Cover 404 error case

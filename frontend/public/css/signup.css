@@ -110,3 +110,26 @@ body {
         font-size: 1.5rem;
     }
 }
+
+.forgot-password {
+    text-align: right;
+    margin-top: 5px;
+}
+
+.forgot-password a {
+    color: #666;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: color 0.3s;
+}
+
+.forgot-password a:hover {
+    color: #444;
+    text-decoration: underline;
+}
+
+.reset-instructions {
+    text-align: center;
+    color: #666;
+    margin-bottom: 25px;
+}

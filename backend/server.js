@@ -36,3 +36,11 @@ app.get("/profile", (req, res) => {
 app.get("/signup", (req, res) => {
     res.render("signup");
 })
+
+app.get("/login", (req, res) => {
+    res.render("login");
+})
+
+app.get("/forgot-password", (req, res) => {
+    res.render("forgot-password");
+})
