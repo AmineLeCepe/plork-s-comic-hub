@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const connectDB = require('./config/mongodb');
 const mongoose = require("mongoose");
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 // Database imports
@@ -51,6 +52,28 @@ app.get("/forgot-password", (req, res) => {
 
 /// Post
 
-app.post("/register", (req, res) => {
+app.post("/register", async (req, res) => {
     console.log(req.body);
+    const {username, email, password, confirmPassword} = req.body;
+    if (password === confirmPassword){
+        // Adds user
+        // Hashes the password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
+
+        // Creates a new user object and stores the form data with the hashed password in it
+        const newUser = new models.User({
+            email,
+            username,
+            passwordHash,
+        });
+
+        // For debugging
+        console.log(newUser);
+
+        // Redirects the user to the login page after it's created
+        res.redirect("/login");
+    } else {
+        res.redirect("/signup");
+    }
 })

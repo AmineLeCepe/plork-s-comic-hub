@@ -3,3 +3,4 @@
 - Restrict access to login/sign up pages for already logged in users
 - Cover 404 error case
 - Set up email validation
+- Make sure passwords are conform on the frontend side before actually registering a user

@@ -133,3 +133,28 @@ body {
     color: #666;
     margin-bottom: 25px;
 }
+
+/* Add this to your existing CSS file */
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    padding: 12px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    border-left: 4px solid #c62828;
+    font-size: 0.9rem;
+}
+
+/* Style for the date input to match other inputs */
+input[type="date"] {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+input[type="date"]:focus {
+    border-color: #444;
+    outline: none;
+}
