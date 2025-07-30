@@ -1,6 +1,5 @@
-- Recaptcha for signing up/logging in 
-- Change user modal on 2nd navbar depending on whether the user is logged in or not
-- Restrict access to login/sign up pages for already logged in users
+- Recaptcha for signing up/logging in
+- Cover some specific error cases on the backend side for signing up/in
 - Cover 404 error case
 - Set up email validation
 - Make sure passwords are conform on the frontend side before actually registering a user
