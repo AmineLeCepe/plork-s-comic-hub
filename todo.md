@@ -2,3 +2,4 @@
 - Change user modal on 2nd navbar depending on whether the user is logged in or not
 - Restrict access to login/sign up pages for already logged in users
 - Cover 404 error case
+- Set up email validation

@@ -19,12 +19,16 @@ app.set('views', path.join(__dirname, '../frontend/views'));
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, '../frontend/public')));
 
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
 })
 
 // Routes
-
+/// Get
 app.get("/", (req, res) => {
     res.render("index");
 })
@@ -43,4 +47,10 @@ app.get("/login", (req, res) => {
 
 app.get("/forgot-password", (req, res) => {
     res.render("forgot-password");
+})
+
+/// Post
+
+app.post("/register", (req, res) => {
+    console.log(req.body);
 })
