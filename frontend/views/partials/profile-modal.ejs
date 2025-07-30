@@ -1,105 +1,121 @@
 <div id="profileModal" class="profile-modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div class="user-info">
-                <img src="/assets/default-avatar.png" alt="Profile" class="modal-profile-img"/>
-                <div class="user-details">
-                    <h3 class="username">
-                        <%= user ? user.username : "Username" %>
-                    </h3>
-                    <span class="user-status">Member since 2025</span>
+
+    <% if (user) { %>
+        <%# --- LOGGED-IN STATE --- %>
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="user-info">
+                    <img src="/assets/default-avatar.png" alt="Profile" class="modal-profile-img"/>
+                    <div class="user-details">
+                        <h3 class="username"><%= user.username %></h3>
+                        <span class="user-status">Member since <%= user.createdAt.getFullYear() %></span>
+                    </div>
                 </div>
+                <span class="close-modal">&times;</span>
             </div>
-            <span class="close-modal">&times;</span>
+            <div class="modal-body">
+                <ul class="profile-menu">
+                    <li class="profile-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        <a href="/profile">My Profile</a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+                        <a href="/bookmarks">My Bookmarks</a>
+                    </li>
+                    <li class="profile-menu-item">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                        <a href="/reading-history">Reading History</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="sign-out-btn" onclick="window.location.href='/logout'">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                    Sign Out
+                </button>
+            </div>
         </div>
-        <div class="modal-body">
-            <ul class="profile-menu">
-                <li class="profile-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                    <a href="/profile">My Profile</a>
-                </li>
-                <li class="profile-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-                    <a href="/bookmarks">My Bookmarks</a>
-                </li>
-                <li class="profile-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                    <a href="/reading-history">Reading History</a>
-                </li>
-                <li class="profile-menu-item">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                    <a href="/settings">Settings</a>
-                </li>
-            </ul>
+
+    <% } else { %>
+        <%# --- LOGGED-OUT STATE --- %>
+        <div class="modal-content logged-out">
+            <div class="modal-header">
+                <h3 class="username">Log In</h3>
+                <span class="close-modal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form action="/login" method="POST" class="modal-login-form">
+                    <div class="form-group">
+                        <label for="modal-username">Username</label>
+                        <input type="text" id="modal-username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="modal-password">Password</label>
+                        <input type="password" id="modal-password" name="password" required>
+                    </div>
+                    <button type="submit" class="auth-button">Log In</button>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <a href="/forgot-password">Forgot password?</a>
+            </div>
         </div>
-        <div class="modal-footer">
-            <button class="sign-out-btn" onclick="window.location.href='/logout'">
-                <svg xmlns="http://www.w3.org/2000/svg" height="18" width="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                    <polyline points="16 17 21 12 16 7"></polyline>
-                    <line x1="21" y1="12" x2="9" y2="12"></line>
-                </svg>
-                Sign Out
-            </button>
-            <a href="/signup">Debug</a>
-        </div>
-    </div>
+    <% } %>
+
 </div>
 
 <script>
-    // Get the modal
-    const modal = document.getElementById("profileModal");
+    document.addEventListener("DOMContentLoaded", function() {
+        const modal = document.getElementById("profileModal");
+        if (!modal) return;
 
-    // Get the button that opens the modal
-    const profileIcon = document.getElementById("profileIcon");
+        const profileIcon = document.getElementById("profileIcon");
+        const closeBtns = document.getElementsByClassName("close-modal");
 
-    // Get the <span> element that closes the modal
-    const closeBtn = document.getElementsByClassName("close-modal")[0];
+        function positionModal() {
+            if (!profileIcon) return;
+            const profileRect = profileIcon.getBoundingClientRect();
+            const modalContent = modal.querySelector(".modal-content");
+            if (!modalContent) return;
 
-    // Position the modal content correctly beneath the profile icon
-    function positionModal() {
-        const profileRect = profileIcon.getBoundingClientRect();
-        const modalContent = document.querySelector(".modal-content");
+            const top = profileRect.bottom + window.scrollY + 10;
+            const right = window.innerWidth - profileRect.right;
 
-        // Calculate position to align it with the profile icon
-        const top = profileRect.bottom + window.scrollY + 10; // 10px below the profile icon
-        const right = window.innerWidth - profileRect.right - (profileRect.width / 2);
-
-        modalContent.style.top = `${top}px`;
-        modalContent.style.right = `${right}px`;
-    }
-
-    // When the user clicks on the profile icon, open the modal
-    profileIcon.onclick = function() {
-        positionModal(); // Position the modal before showing it
-        modal.style.display = "block";
-        setTimeout(() => {
-            modal.classList.add("active");
-        }, 10);
-    }
-
-    // When the user clicks on <span> (x), close the modal
-    closeBtn.onclick = function() {
-        modal.classList.remove("active");
-        setTimeout(() => {
-            modal.style.display = "none";
-        }, 300);
-    }
-
-    // When the user clicks anywhere outside of the modal, close it
-    window.onclick = function(event) {
-        if (event.target == modal) {
-            modal.classList.remove("active");
-            setTimeout(() => {
-                modal.style.display = "none";
-            }, 300);
+            modalContent.style.top = `${top}px`;
+            modalContent.style.right = `${right}px`;
         }
-    }
 
-    // Reposition modal if window is resized
-    window.addEventListener('resize', function() {
-        if (modal.style.display === "block") {
-            positionModal();
+        if (profileIcon) {
+            profileIcon.onclick = function() {
+                positionModal();
+                modal.style.display = "block";
+                setTimeout(() => modal.classList.add("active"), 10);
+            }
         }
+
+        for (let i = 0; i < closeBtns.length; i++) {
+            closeBtns[i].onclick = function() {
+                modal.classList.remove("active");
+                setTimeout(() => modal.style.display = "none", 300);
+            }
+        }
+
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.classList.remove("active");
+                setTimeout(() => modal.style.display = "none", 300);
+            }
+        }
+
+        window.addEventListener('resize', function() {
+            if (modal.style.display === "block") {
+                positionModal();
+            }
+        });
     });
 </script>

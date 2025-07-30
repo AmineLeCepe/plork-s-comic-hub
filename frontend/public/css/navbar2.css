@@ -203,3 +203,64 @@
         right: 20px;
     }
 }
+/* --- Styles for Login Form in Modal --- */
+
+.modal-content.logged-out .modal-body {
+    padding: 16px;
+}
+
+.modal-login-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.modal-login-form label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.modal-login-form input[type="text"],
+.modal-login-form input[type="password"] {
+    width: 100%;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    box-sizing: border-box; /* Ensures padding doesn't break layout */
+}
+
+.modal-content.logged-out .auth-button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 0.5rem;
+    background-color: #444;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.modal-content.logged-out .auth-button:hover {
+    background-color: #333;
+}
+
+.modal-content.logged-out .modal-footer {
+    justify-content: center;
+    border-top: none;
+    padding: 0 16px 16px;
+}
+
+.modal-content.logged-out .modal-footer a {
+    font-size: 0.8rem;
+    color: #555;
+    text-decoration: none;
+}
+
+.modal-content.logged-out .modal-footer a:hover {
+    text-decoration: underline;
+}

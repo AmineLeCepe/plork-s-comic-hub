@@ -163,13 +163,22 @@ body {
     gap: 15px;
 }
 
-/* Chapter item styling for the latest section */
+/* Add a transition to the base item for a smooth effect */
 .latest-chapter-item {
     background-color: #444; /* Gray background */
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     color: white; /* White text color */
+    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Define the styles for the hover state */
+.latest-chapter-item:hover {
+    transform: translateY(-5px) scale(1.02); /* Lifts the item slightly */
+    background-color: #555; /* Lightens the background */
+    box-shadow: 0 8px 16px rgba(0,0,0,0.3); /* Enhances the shadow */
+    cursor: pointer; /* Changes the cursor to a pointer */
 }
 
 .latest-chapter-item .chapter-header {

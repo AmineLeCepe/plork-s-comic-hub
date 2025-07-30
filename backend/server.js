@@ -70,7 +70,7 @@ app.get("/", (req, res) => {
     res.render("index");
 })
 
-app.get("/profile", (req, res) => {
+app.get("/profile", ensureAuthenticated,(req, res) => {
     res.render("profile");
 })
 
