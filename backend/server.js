@@ -8,6 +8,8 @@ require('dotenv').config();
 
 // Database imports
 const models = require('./models');
+const queries = require('./queries');
+
 
 // App config
 const app = express();
@@ -54,26 +56,40 @@ app.get("/forgot-password", (req, res) => {
 
 app.post("/register", async (req, res) => {
     console.log(req.body);
-    const {username, email, password, confirmPassword} = req.body;
-    if (password === confirmPassword){
-        // Adds user
-        // Hashes the password
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(password, saltRounds);
+    const { username, email, password, confirmPassword, birthDate } = req.body;
 
-        // Creates a new user object and stores the form data with the hashed password in it
-        const newUser = new models.User({
-            email,
-            username,
-            passwordHash,
+    // Basic validation
+    if (!username || !email || !password || !confirmPassword || !birthDate) {
+        return res.status(400).render("signup", {
+            error: "All fields are required",
+            formData: { username, email }
         });
+    }
 
-        // For debugging
-        console.log(newUser);
+    // Validate password confirmation
+    if (password !== confirmPassword) {
+        return res.status(400).render("signup", {
+            error: "Passwords don't match",
+            formData: { username, email }
+        });
+    }
 
-        // Redirects the user to the login page after it's created
-        res.redirect("/login");
+    // Use the addUser function from queries
+    const result = await queries.userQueries.addUser({
+        username,
+        email,
+        password,
+        birthDate
+    });
+
+    if (result.success) {
+        // Redirect to login page on success
+        return res.redirect("/login?registered=true");
     } else {
-        res.redirect("/signup");
+        // Return to signup page with error message
+        return res.status(400).render("signup", {
+            error: result.error,
+            formData: { username, email }
+        });
     }
 })
