@@ -4,6 +4,11 @@ const path = require('path');
 const connectDB = require('./config/mongodb');
 const mongoose = require("mongoose");
 const bcrypt = require('bcrypt');
+const session = require('express-session');
+const MongoStore = require('connect-mongo');
+const passport = require('passport');
+const configPassport = require('./config/passport');
+const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
 
 // Database imports
@@ -26,6 +31,35 @@ app.use(express.static(path.join(__dirname, '../frontend/public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
+// Session and Passport setup - fix the order and configuration
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'your-secret-key',
+    resave: false,
+    saveUninitialized: true, // Change this to true for login sessions
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/yourdbname',
+        collectionName: 'sessions'
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        httpOnly: true
+    }
+}));
+
+// Initialize Passport (correct order is important)
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Configure passport strategies
+configPassport(app);
+
+// AFTER passport setup, add the user to res.locals
+app.use((req, res, next) => {
+    res.locals.user = req.user || null;
+    next();
+});
+
+
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
 })
@@ -40,17 +74,37 @@ app.get("/profile", (req, res) => {
     res.render("profile");
 })
 
-app.get("/signup", (req, res) => {
+app.get("/signup", forwardAuthenticated, (req, res) => {
     res.render("signup");
 })
 
-app.get("/login", (req, res) => {
+app.get("/login", forwardAuthenticated, (req, res) => {
     res.render("login");
 })
 
 app.get("/forgot-password", (req, res) => {
     res.render("forgot-password");
 })
+
+app.get('/logout', (req, res) => {
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        res.redirect('/');
+    });
+})
+
+// Debug route to check authentication status
+app.get('/debug-auth', (req, res) => {
+    res.json({
+        isAuthenticated: req.isAuthenticated(),
+        user: req.user ? {
+            id: req.user._id,
+            username: req.user.username,
+            email: req.user.email
+        } : null,
+        session: req.session
+    });
+});
 
 /// Post
 
@@ -94,9 +148,14 @@ app.post("/register", async (req, res) => {
     }
 })
 
-app.post("/login", async (req, res) => {
-    console.log(req.body);
-    const { email, password } = req.body;
-    res.redirect("/profile");
+app.post("/login", (req, res, next) => {
+    // Log the correct field
+    console.log("Login attempt with username:", req.body.username);
+    
+    passport.authenticate('local', {
+        successRedirect: '/',
+        failureRedirect: '/login',
+        failureFlash: true // You can enable flash messages for errors
+    })(req, res, next);
+});
 
-})
