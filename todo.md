@@ -1,3 +1,3 @@
-- Recaptcha for signing up/logging in
-- Cover 404 error case
 - Set up email validation
+- Test with one comic
+- Forgot password implementation
