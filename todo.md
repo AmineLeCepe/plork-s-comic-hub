@@ -1,5 +1,3 @@
 - Recaptcha for signing up/logging in
-- Cover some specific error cases on the backend side for signing up/in
 - Cover 404 error case
 - Set up email validation
-- Make sure passwords are conform on the frontend side before actually registering a user

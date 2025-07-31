@@ -179,3 +179,9 @@ app.post("/login", (req, res, next) => {
         });
     })(req, res, next);
 });
+
+/// 404 error handler
+
+app.use((req, res) => {
+    res.status(404).render('404');
+});
