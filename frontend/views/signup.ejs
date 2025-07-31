@@ -58,7 +58,6 @@
         </div>
     </div>
 </div>
-
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const togglePasswordButtons = document.querySelectorAll('.toggle-password');
@@ -71,6 +70,20 @@
                 this.textContent = (type === 'password') ? 'Show' : 'Hide';
             });
         });
+    });
+
+    document.querySelector('.auth-form').addEventListener('submit', function(e) {
+        const password = document.getElementById('password').value;
+        if (password.length < 8 || password.length > 16) {
+            e.preventDefault();
+            let errorDiv = document.querySelector('.error-message');
+            if (!errorDiv) {
+                errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                this.parentNode.insertBefore(errorDiv, this);
+            }
+            errorDiv.textContent = 'Password must be between 8 and 16 characters long.';
+        }
     });
 </script>
 
