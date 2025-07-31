@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const MongoStore = require('connect-mongo');
 const passport = require('passport');
+const flash = require('connect-flash');
 const configPassport = require('./config/passport');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
@@ -50,12 +51,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+// 2. Use flash middleware
+app.use(flash());
+
 // Configure passport strategies
 configPassport(app);
 
-// AFTER passport setup, add the user to res.locals
+// AFTER passport setup, add the user and flash messages to res.locals
 app.use((req, res, next) => {
     res.locals.user = req.user || null;
+    res.locals.error = req.flash('error'); // For passport-local error messages
     next();
 });
 
@@ -158,4 +163,3 @@ app.post("/login", (req, res, next) => {
         failureFlash: true // You can enable flash messages for errors
     })(req, res, next);
 });
-

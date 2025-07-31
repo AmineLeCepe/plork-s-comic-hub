@@ -1,5 +1,11 @@
 <div id="profileModal" class="profile-modal">
 
+    <% if (error && error.length > 0) { %>
+        <div class="alert-error" style="color: red; padding: 10px; border: 1px solid red;">
+            <%= error %>
+        </div>
+    <% } %>
+
     <% if (user) { %>
         <%# --- LOGGED-IN STATE --- %>
         <div class="modal-content">
