@@ -4,8 +4,7 @@
     <title>Sign up</title>
     <%- include("partials/head") %>
     <link rel="stylesheet" href="css/signup.css">
-</head>
-<body>
+</head><body>
 <div class="main-container">
     <div class="auth-logo">
         <a href="/">Logo</a>
@@ -13,7 +12,7 @@
     <div class="auth-container">
         <div class="auth-form-wrapper">
             <h1>Create an Account</h1>
-            <% if (typeof error !== 'undefined') { %>
+            <% if (typeof error !== 'undefined' && error.length > 0) { %>
                 <div class="error-message">
                     <%= error %>
                 </div>
