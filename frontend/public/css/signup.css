@@ -158,3 +158,44 @@ input[type="date"]:focus {
     border-color: #444;
     outline: none;
 }
+/* Add these styles to the end of your existing signup.css file */
+
+/* Wrapper for positioning the password input and toggle button */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* Ensure the input takes the full width of its container */
+.password-wrapper input {
+    width: 100%;
+    /* Add padding to the right to prevent text from overlapping the button */
+    padding-right: 55px; 
+}
+
+/* Styles for the "Show/Hide" button */
+.toggle-password {
+    position: absolute;
+    /* Position it inside the input field on the right side */
+    right: 15px; 
+    top: 50%;
+    transform: translateY(-50%);
+    
+    background: none;
+    border: none;
+    cursor: pointer;
+    
+    color: #666;
+    font-weight: 600;
+    font-size: 0.8rem;
+    padding: 4px;
+    
+    -webkit-user-select: none; /* Prevent text selection */
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.toggle-password:hover {
+    color: #333;
+}
