@@ -4,6 +4,7 @@
     <title>Sign up</title>
     <%- include("partials/head") %>
     <link rel="stylesheet" href="css/signup.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
 <body>
 <div class="main-container">
@@ -48,6 +49,8 @@
                         <input type="password" id="confirmPassword" name="confirmPassword" required>
                     </div>
                 </div>
+
+                <div class="g-recaptcha" data-sitekey="6LelL5YrAAAAACFRFePjFzQlLtbET-39cMxDJiui"></div>
 
                 <button type="submit" class="auth-button">Sign Up</button>
             </form>

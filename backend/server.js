@@ -9,6 +9,7 @@ const MongoStore = require('connect-mongo');
 const passport = require('passport');
 const flash = require('connect-flash');
 const configPassport = require('./config/passport');
+const axios = require('axios');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
 
@@ -115,7 +116,7 @@ app.get('/debug-auth', (req, res) => {
 
 app.post("/register", async (req, res) => {
     console.log(req.body);
-    const { username, email, password, confirmPassword, birthDate } = req.body;
+    const { username, email, password, confirmPassword, birthDate, 'g-recaptcha-response': recaptchaResponse } = req.body;
 
     // Basic validation
     if (!username || !email || !password || !confirmPassword || !birthDate) {
@@ -129,6 +130,28 @@ app.post("/register", async (req, res) => {
     if (password !== confirmPassword) {
         return res.status(400).render("signup", {
             error: "Passwords don't match",
+            formData: { username, email }
+        });
+    }
+
+    // reCAPTCHA validation
+    const recaptchaSecretKey = process.env.RECAPTCHA_SECRET_KEY;
+    try {
+        const recaptchaVerifyUrl = `https://www.google.com/recaptcha/api/siteverify?secret=${recaptchaSecretKey}&response=${recaptchaResponse}`;
+        const recaptchaResponseData = await axios.post(recaptchaVerifyUrl);
+        console.log("reCAPTCHA Response:", recaptchaResponseData.data); // debugging line
+        const { success } = recaptchaResponseData.data;
+
+        if (!success) {
+            return res.status(400).render("signup", {
+                error: "reCAPTCHA verification failed",
+                formData: { username, email }
+            });
+        }
+    } catch (error) {
+        console.error("reCAPTCHA verification error:", error);
+        return res.status(500).render("signup", {
+            error: "Failed to verify reCAPTCHA. Please try again.",
             formData: { username, email }
         });
     }
