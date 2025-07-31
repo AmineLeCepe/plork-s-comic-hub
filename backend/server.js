@@ -37,11 +37,11 @@ app.use(session({
     resave: false,
     saveUninitialized: true, // Change this to true for login sessions
     store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI || 'mongodb://localhost:27017/yourdbname',
+        mongoUrl: process.env.MONGODB_URI,
         collectionName: 'sessions'
     }),
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
         httpOnly: true
     }
 }));
