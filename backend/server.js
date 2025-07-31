@@ -154,12 +154,28 @@ app.post("/register", async (req, res) => {
 })
 
 app.post("/login", (req, res, next) => {
-    // Log the correct field
-    console.log("Login attempt with username:", req.body.username);
-    
-    passport.authenticate('local', {
-        successRedirect: '/',
-        failureRedirect: '/login',
-        failureFlash: true // You can enable flash messages for errors
+    // Determine the URL to redirect to on failure.
+    // 'Referer' is the page where the request originated.
+    const redirectUrl = req.header('Referer') || '/login';
+
+    passport.authenticate('local', (err, user, info) => {
+        if (err) {
+            return next(err);
+        }
+        
+        // If authentication fails, flash the error and redirect back.
+        if (!user) {
+            req.flash('error', info.message);
+            return res.redirect(redirectUrl);
+        }
+
+        // If authentication succeeds, log the user in.
+        req.logIn(user, (err) => {
+            if (err) {
+                return next(err);
+            }
+            // Redirect to the homepage on successful login.
+            return res.redirect('/');
+        });
     })(req, res, next);
 });

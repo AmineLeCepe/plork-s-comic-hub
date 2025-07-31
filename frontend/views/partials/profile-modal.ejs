@@ -1,10 +1,6 @@
 <div id="profileModal" class="profile-modal">
 
-    <% if (error && error.length > 0) { %>
-        <div class="alert-error" style="color: red; padding: 10px; border: 1px solid red;">
-            <%= error %>
-        </div>
-    <% } %>
+    <%# The error display is now inside the modal's logged-out view %>
 
     <% if (user) { %>
         <%# --- LOGGED-IN STATE --- %>
@@ -51,10 +47,15 @@
         <%# --- LOGGED-OUT STATE --- %>
         <div class="modal-content logged-out">
             <div class="modal-header">
-                <h3 class="username">Log In</h3>
+                <h3 class="username">Sign In</h3>
                 <span class="close-modal">&times;</span>
             </div>
             <div class="modal-body">
+                <% if (error && error.length > 0) { %>
+                    <div class="alert-error" style="color: red; padding-bottom: 12px; text-align: center; font-weight: 500;">
+                        <%= error %>
+                    </div>
+                <% } %>
                 <form action="/login" method="POST" class="modal-login-form">
                     <div class="form-group">
                         <label for="modal-username">Username</label>
@@ -96,12 +97,14 @@
             modalContent.style.right = `${right}px`;
         }
 
+        function openModal() {
+            positionModal();
+            modal.style.display = "block";
+            setTimeout(() => modal.classList.add("active"), 10);
+        }
+
         if (profileIcon) {
-            profileIcon.onclick = function() {
-                positionModal();
-                modal.style.display = "block";
-                setTimeout(() => modal.classList.add("active"), 10);
-            }
+            profileIcon.onclick = openModal;
         }
 
         for (let i = 0; i < closeBtns.length; i++) {
@@ -123,5 +126,11 @@
                 positionModal();
             }
         });
+        
+        // If an error message exists, open the modal automatically
+        const hasError = <%= (typeof error !== 'undefined' && error.length > 0) ? 'true' : 'false' %>;
+        if (hasError) {
+            openModal();
+        }
     });
 </script>
