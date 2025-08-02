@@ -1,3 +1,3 @@
 - Set up email validation
 - Test with one comic
-- Forgot password implementation
+- Forgot password implementation (finish oauth2 token thing)

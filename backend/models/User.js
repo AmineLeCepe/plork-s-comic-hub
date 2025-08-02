@@ -23,7 +23,9 @@ const report = new mongoose.Schema({
 
     bookmarks: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Bookmark' }],
     following: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-    readingHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ViewHistory' }]
+    readingHistory: [{ type: mongoose.Schema.Types.ObjectId, ref: 'ViewHistory' }],
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date }
 }, { timestamps: true });
 
 

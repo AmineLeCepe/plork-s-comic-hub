@@ -10,6 +10,9 @@ const passport = require('passport');
 const flash = require('connect-flash');
 const configPassport = require('./config/passport');
 const axios = require('axios');
+const crypto = require('crypto');
+const nodemailer = require('nodemailer');
+const { google } = require('googleapis');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
 
@@ -70,6 +73,56 @@ app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
 })
 
+
+// Forgot password config
+
+const OAuth2 = google.auth.OAuth2;
+
+const oauth2Client = new OAuth2(
+    process.env.OAUTH_CLIENT_ID,
+    process.env.OAUTH_CLIENT_SECRET,
+    process.env.OAUTH_REDIRECT_URI
+);
+
+oauth2Client.setCredentials({
+    refresh_token: process.env.OAUTH_REFRESH_TOKEN
+});
+
+async function sendPasswordResetEmail(email, resetUrl) {
+    try {
+        const accessToken = await oauth2Client.getAccessToken();
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                type: 'OAuth2',
+                user: process.env.EMAIL_USER,
+                clientId: process.env.OAUTH_CLIENT_ID,
+                clientSecret: process.env.OAUTH_CLIENT_SECRET,
+                refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+                accessToken: accessToken
+            }
+        });
+
+        const mailOptions = {
+            to: email,
+            from: process.env.EMAIL_USER,
+            subject: 'Password Reset',
+            html: `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
+                   <p>Please click on the following link, or paste this into your browser to complete the process:</p>
+                   <a href="${resetUrl}">${resetUrl}</a>
+                   <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`
+        };
+
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully');
+    } catch (error) {
+        console.error('Error sending email: ', error);
+        throw error;
+    }
+}
+
+
 // Routes
 /// Get
 app.get("/", (req, res) => {
@@ -99,6 +152,28 @@ app.get('/logout', (req, res) => {
     });
 })
 
+app.get('/reset-password/:token', async (req, res) => {
+    try {
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        const user = await models.User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            req.flash('error', 'Password reset token is invalid or has expired.');
+            return res.redirect('/forgot-password');
+        }
+
+        res.render('reset-password', { token: req.params.token }); // Render a reset password form
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'An error occurred. Please try again.');
+        res.redirect('/forgot-password');
+    }
+});
+
 // Debug route to check authentication status
 app.get('/debug-auth', (req, res) => {
     res.json({
@@ -110,6 +185,43 @@ app.get('/debug-auth', (req, res) => {
         } : null,
         session: req.session
     });
+});
+
+// Temporary routes for OAuth2
+
+app.get('/get-oauth2-token', async (req, res) => {
+    const oauth2Client = new OAuth2(
+        process.env.OAUTH_CLIENT_ID,
+        process.env.OAUTH_CLIENT_SECRET,
+        process.env.OAUTH_REDIRECT_URI
+    );
+
+    const authUrl = oauth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: ['https://mail.google.com/'],
+    });
+
+    console.log('Authorize this app by visiting this url: ', authUrl);
+    res.send(`Authorize this app by visiting this url:  <a href="${authUrl}">Authorize</a>`);
+});
+
+app.get('/oauth2/callback', async (req, res) => {
+    const code = req.query.code;
+    const oauth2Client = new OAuth2(
+        process.env.OAUTH_CLIENT_ID,
+        process.env.OAUTH_CLIENT_SECRET,
+        process.env.OAUTH_REDIRECT_URI
+    );
+
+    try {
+        const tokenResponse = await oauth2Client.getToken(code);
+        const refreshToken = tokenResponse.tokens.refresh_token;
+        console.log('Refresh Token:', refreshToken);
+        res.send('Refresh token has been logged to the console.  Please set it as an environment variable.');
+    } catch (e) {
+        console.log('Error getting tokens: ', e);
+        res.send('Error getting tokens.');
+    }
 });
 
 /// Post
@@ -201,6 +313,85 @@ app.post("/login", (req, res, next) => {
             return res.redirect('/');
         });
     })(req, res, next);
+});
+
+app.post("/forgot-password", async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await models.User.findOne({ email });
+
+        if (!user) {
+            req.flash('error', 'No account with that email address exists.');
+            return res.redirect('/forgot-password');
+        }
+
+        // Generate a reset token
+        const resetToken = crypto.randomBytes(20).toString('hex');
+
+        // Hash the token and save it to the user's account
+        user.resetPasswordToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+        user.resetPasswordExpires = Date.now() + 3600000; // Token expires in 1 hour
+        await user.save();
+
+        // Create reset link
+        const resetUrl = `${req.protocol}://${req.get('host')}/reset-password/${resetToken}`;
+
+        // Send email
+        try {
+            await sendPasswordResetEmail(email, resetUrl);
+            req.flash('success', `An email has been sent to ${email} with further instructions.`);
+            res.redirect('/forgot-password');
+        } catch (error) {
+            console.error('nodemailer error: ', error);
+            req.flash('error', 'Failed to send reset email. Please try again.');
+            return res.redirect('/forgot-password');
+        }
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'An error occurred. Please try again.');
+        res.redirect('/forgot-password');
+    }
+});
+
+app.post('/reset-password/:token', async (req, res) => {
+    try {
+        const { password, confirmPassword } = req.body;
+        if (password !== confirmPassword) {
+            req.flash('error', 'Passwords do not match.');
+            return res.redirect(`/reset-password/${req.params.token}`);
+        }
+
+        const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
+
+        const user = await models.User.findOne({
+            resetPasswordToken: hashedToken,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            req.flash('error', 'Password reset token is invalid or has expired.');
+            return res.redirect('/forgot-password');
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Update user's password and remove reset token fields
+        user.passwordHash = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        req.flash('success', 'Password successfully updated!');
+        res.redirect('/login');
+
+    } catch (err) {
+        console.error(err);
+        req.flash('error', 'An error occurred. Please try again.');
+        return res.redirect(`/reset-password/${req.params.token}`);
+    }
 });
 
 /// 404 error handler
