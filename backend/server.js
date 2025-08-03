@@ -108,10 +108,14 @@ async function sendPasswordResetEmail(email, resetUrl) {
             to: email,
             from: process.env.EMAIL_USER,
             subject: 'Password Reset',
-            html: `<p>You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
-                   <p>Please click on the following link, or paste this into your browser to complete the process:</p>
-                   <a href="${resetUrl}">${resetUrl}</a>
-                   <p>If you did not request this, please ignore this email and your password will remain unchanged.</p>`
+            html: `<body style="font-family: 'Inter', sans-serif; background-color: #f1f1f1; padding: 20px;">
+                       <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+                           <p style="font-size: 16px; color: #333;">You are receiving this because you (or someone else) have requested the reset of the password for your account.</p>
+                           <p style="font-size: 16px; color: #333;">Please click on the following link, or paste this into your browser to complete the process:</p>
+                           <a href="${resetUrl}" style="color: #007bff; text-decoration: none; font-weight: bold;">${resetUrl}</a>
+                           <p style="font-size: 16px; color: #333;">If you did not request this, please ignore this email and your password will remain unchanged.</p>
+                       </div>
+                   </body>`
         };
 
         await transporter.sendMail(mailOptions);
