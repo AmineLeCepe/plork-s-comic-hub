@@ -189,40 +189,40 @@ app.get('/debug-auth', (req, res) => {
 
 // Temporary routes for OAuth2
 
-app.get('/get-oauth2-token', async (req, res) => {
-    const oauth2Client = new OAuth2(
-        process.env.OAUTH_CLIENT_ID,
-        process.env.OAUTH_CLIENT_SECRET,
-        process.env.OAUTH_REDIRECT_URI
-    );
-
-    const authUrl = oauth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: ['https://mail.google.com/'],
-    });
-
-    console.log('Authorize this app by visiting this url: ', authUrl);
-    res.send(`Authorize this app by visiting this url:  <a href="${authUrl}">Authorize</a>`);
-});
-
-app.get('/oauth2/callback', async (req, res) => {
-    const code = req.query.code;
-    const oauth2Client = new OAuth2(
-        process.env.OAUTH_CLIENT_ID,
-        process.env.OAUTH_CLIENT_SECRET,
-        process.env.OAUTH_REDIRECT_URI
-    );
-
-    try {
-        const tokenResponse = await oauth2Client.getToken(code);
-        const refreshToken = tokenResponse.tokens.refresh_token;
-        console.log('Refresh Token:', refreshToken);
-        res.send('Refresh token has been logged to the console.  Please set it as an environment variable.');
-    } catch (e) {
-        console.log('Error getting tokens: ', e);
-        res.send('Error getting tokens.');
-    }
-});
+// app.get('/get-oauth2-token', async (req, res) => {
+//     const oauth2Client = new OAuth2(
+//         process.env.OAUTH_CLIENT_ID,
+//         process.env.OAUTH_CLIENT_SECRET,
+//         process.env.OAUTH_REDIRECT_URI
+//     );
+//
+//     const authUrl = oauth2Client.generateAuthUrl({
+//         access_type: 'offline',
+//         scope: ['https://mail.google.com/'],
+//     });
+//
+//     console.log('Authorize this app by visiting this url: ', authUrl);
+//     res.send(`Authorize this app by visiting this url:  <a href="${authUrl}">Authorize</a>`);
+// });
+//
+// app.get('/oauth2/callback', async (req, res) => {
+//     const code = req.query.code;
+//     const oauth2Client = new OAuth2(
+//         process.env.OAUTH_CLIENT_ID,
+//         process.env.OAUTH_CLIENT_SECRET,
+//         process.env.OAUTH_REDIRECT_URI
+//     );
+//
+//     try {
+//         const tokenResponse = await oauth2Client.getToken(code);
+//         const refreshToken = tokenResponse.tokens.refresh_token;
+//         console.log('Refresh Token:', refreshToken);
+//         res.send('Refresh token has been logged to the console.  Please set it as an environment variable.');
+//     } catch (e) {
+//         console.log('Error getting tokens: ', e);
+//         res.send('Error getting tokens.');
+//     }
+// });
 
 /// Post
 
