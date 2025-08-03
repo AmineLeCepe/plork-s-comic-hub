@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+    <title>Manage Comics</title>
+    <%- include("partials/head" )%>
+
+<body>
+    <%- include("partials/navbar") %>
+    <div class="main-content">
+        <%- include("partials/navbar2") %>
+
+        <div class="manage-lists-content">
+            <div class="lists-header">
+                <h1>My Comics</h1>
+            </div>
+
+            <div class="lists-container">
+                <% if (comics && comics.length > 0) { %>
+                    <div class="comics-grid-container">
+                        <% comics.forEach(comic => { %>
+                            <a href="/comic/<%= comic._id %>" class="comic-thumbnail-link">
+                                <div class="comic-thumbnail-item">
+                                    <img src="<%= comic.img %>" alt="<%= comic.name %>" class="comic-thumbnail-img">
+                                    <div class="comic-title-overlay">
+                                        <span class="comic-title"><%= comic.name %></span>
+                                    </div>
+                                </div>
+                            </a>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="no-comics-message">
+                        <p>No comics yet.</p>
+                    </div>
+                <% } %>
+            </div>
+
+            <a href="/list/create" class="new-list-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>New Comic</span>
+            </a>
+        </div>
+    </div>
+    <%- include("partials/scripts")%>
+</body>
+</html>
