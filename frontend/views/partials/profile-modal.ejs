@@ -29,6 +29,18 @@
                         <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                         <a href="/reading-history">Reading History</a>
                     </li>
+                    <% if (user.roles.isAdmin) { %>
+                        <li class="profile-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h18v18H3z m8 2h2v6h-2V5z m0 8h2v2h-2v-2z"></path></svg>
+                            <a href="/admin">Admin Panel</a>
+                        </li>
+                    <% } %>
+                    <% if (user.roles.isAdmin || user.roles.isAuthor) { %>
+                        <li class="profile-menu-item">
+                            <svg xmlns="http://www.w3.org/2000/svg" height="20" width="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect><rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect><line x1="6" y1="6" x2="6" y2="6"></line><line x1="6" y1="18" x2="6" y2="18"></line></svg>
+                            <a href="/manage-uploads">Manage Uploads</a>
+                        </li>
+                    <% } %>
                 </ul>
             </div>
             <div class="modal-footer">
@@ -129,7 +141,7 @@
                 positionModal();
             }
         });
-        
+
         // If an error message exists, open the modal automatically
         const hasError = <%= (typeof error !== 'undefined' && error.length > 0) ? 'true' : 'false' %>;
         if (hasError) {
