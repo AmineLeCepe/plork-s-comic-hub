@@ -127,16 +127,6 @@ async function sendPasswordResetEmail(email, resetUrl) {
 }
 
 
-
-// Debug variables
-const comics = [
-    { _id: '1', name: 'Sample Comic 1', img: '/assets/chapter-placeholder.png' },
-    { _id: '2', name: 'Sample Comic 2', img: '/assets/chapter-placeholder.png' },
-    { _id: '3', name: 'Sample Comic 3', img: '/assets/chapter-placeholder.png' },
-    { _id: '4', name: 'Sample Comic 4', img: '/assets/chapter-placeholder.png' },
-    { _id: '5', name: 'Sample Comic 5', img: '/assets/chapter-placeholder.png' },
-];
-
 // Routes
 /// Get
 app.get("/", (req, res) => {
@@ -186,10 +176,6 @@ app.get('/reset-password/:token', async (req, res) => {
         req.flash('error', 'An error occurred. Please try again.');
         res.redirect('/forgot-password');
     }
-});
-
-app.get('/manage-uploads', (req, res) => {
-    res.render('manage-uploads', {comics});
 });
 
 // Debug route to check authentication status
