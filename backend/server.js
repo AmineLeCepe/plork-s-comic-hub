@@ -156,6 +156,10 @@ app.get('/logout', (req, res) => {
     });
 })
 
+app.get('/manage-uploads', ensureAuthenticated, (req, res) => {
+    res.render('manage-uploads');
+})
+
 app.get('/reset-password/:token', async (req, res) => {
     try {
         const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
