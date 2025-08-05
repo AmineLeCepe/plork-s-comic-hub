@@ -31,10 +31,28 @@
                 </div>
             <% } %>
         </div>
-        <button class="new-comic-btn">+ New Comic</button>
+        <button class="new-comic-btn" id="openModal">+ New Comic</button>
     </div>
 
+    <%- include("partials/new-comic-modal.ejs") %>
 </div>
+
+<script>
+    const openBtn = document.getElementById("openModal");
+    const closeBtn = document.getElementById("closeModal");
+    const modal = document.getElementById("modal");
+
+    openBtn.addEventListener("click", function() {
+        modal.classList.add("open");
+    })
+
+    closeBtn.addEventListener("click", function() {
+        modal.classList.remove("open");
+    })
+</script>
+
 <%- include("partials/scripts") %>
+
+
 </body>
 </html>
