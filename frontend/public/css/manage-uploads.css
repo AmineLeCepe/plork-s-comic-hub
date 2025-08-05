@@ -85,20 +85,63 @@
 
 /* new comic modal section */
 
-.modal.open {
-    opacity: 1;
-    z-index: 999;
-}
-
 .modal {
     position: fixed;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
     display: flex;
     align-items: center;
     justify-content: center;
 
+    /* Hide by default */
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.open {
+    opacity: 1;
+    z-index: 999; /* Bring to front when open */
+}
+
+.modal-inner {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px; /* Consistent with auth forms */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.modal-inner h2 {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal-inner p {
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+#closeModal {
+    background-color: #444444;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+#closeModal:hover {
+    background-color: #333333;
 }
