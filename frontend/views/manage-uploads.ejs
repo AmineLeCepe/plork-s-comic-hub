@@ -41,14 +41,27 @@
     const openBtn = document.getElementById("openModal");
     const closeBtn = document.getElementById("closeModal");
     const modal = document.getElementById("modal");
+    const coverInput = document.getElementById("cover");
+    const coverPreview = document.getElementById("coverPreview");
 
     openBtn.addEventListener("click", function() {
         modal.classList.add("open");
-    })
+    });
 
     closeBtn.addEventListener("click", function() {
         modal.classList.remove("open");
-    })
+    });
+
+    // Show image preview on file selection
+    coverInput.addEventListener("change", function() {
+        if (this.files && this.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                coverPreview.src = e.target.result;
+            };
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
 </script>
 
 <%- include("partials/scripts") %>

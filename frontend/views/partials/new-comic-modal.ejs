@@ -1,12 +1,55 @@
 <div class="modal" id="modal">
     <div class="modal-inner">
-        <h2>Placeholder</h2>
-        <p>
-            This is a placeholder for the new comic modal. It will be replaced with the actual content once the feature is implemented.
-            <br>
-            <br>
-            <strong>Note:</strong> This modal is currently under development and will be available in a future update.
-        </p>
-        <button id="closeModal">Close</button>
+        <h2>Create New Comic</h2>
+        <form class="new-comic-form" action="/comics/create" method="POST" enctype="multipart/form-data">
+            
+            <!-- Left side for cover -->
+            <div class="form-left">
+                <div class="form-group">
+                    <label for="cover">Cover Image</label>
+                    <div class="cover-upload-area">
+                        <img id="coverPreview" src="/assets/image-placeholder.png" alt="Cover Preview" class="cover-preview">
+                        <input type="file" id="cover" name="cover" accept="image/*" required>
+                        <label for="cover" class="cover-upload-label">Click to Upload</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right side for details -->
+            <div class="form-right">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                <div class="form-group">
+                    <label for="synopsis">Synopsis</label>
+                    <textarea id="synopsis" name="synopsis" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="tags">Tags (comma-separated)</label>
+                    <input type="text" id="tags" name="tags">
+                </div>
+                <div class="form-group">
+                    <label for="releaseDate">Release Date</label>
+                    <input type="date" id="releaseDate" name="releaseDate" required>
+                </div>
+                <div class="checkbox-group">
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="nsfw" name="nsfw">
+                        <label for="nsfw">NSFW</label>
+                    </div>
+                    <div class="checkbox-item">
+                        <input type="checkbox" id="paywalled" name="paywalled">
+                        <label for="paywalled">Paywalled</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form-level actions -->
+            <div class="form-actions">
+                <button type="button" id="closeModal" class="cancel-btn">Cancel</button>
+                <button type="submit" class="submit-btn">Create Comic</button>
+            </div>
+        </form>
     </div>
 </div>

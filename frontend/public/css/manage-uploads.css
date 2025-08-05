@@ -145,3 +145,154 @@
 #closeModal:hover {
     background-color: #333333;
 }
+
+/* New Comic Form styling */
+.new-comic-form {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr; /* Two columns */
+    grid-template-areas: 
+        "left right"
+        "actions actions";
+    gap: 30px;
+    text-align: left;
+}
+
+.form-left { grid-area: left; }
+.form-right { grid-area: right; }
+.form-actions { grid-area: actions; }
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #444;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Cover uploader specifics */
+.cover-upload-area {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.cover-upload-area input[type="file"] {
+    opacity: 0;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+}
+
+.cover-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+}
+
+.cover-upload-label {
+    background-color: rgba(0,0,0,0.5);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    z-index: 1;
+    pointer-events: none; /* Allows clicks to pass through to the input */
+}
+
+/* Checkbox styling */
+.checkbox-group {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    accent-color: #444;
+}
+
+.checkbox-item label {
+    font-weight: normal;
+    color: #333;
+}
+
+/* Form actions (buttons) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.cancel-btn, .submit-btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.submit-btn {
+    background-color: #444444;
+    color: white;
+}
+.submit-btn:hover {
+    background-color: #333333;
+}
+.cancel-btn {
+    background-color: #f1f1f1;
+    color: #555;
+    border: 1px solid #ddd;
+}
+.cancel-btn:hover {
+    background-color: #e5e5e5;
+}
+
+/* Adjust modal width for the new form */
+.modal-inner {
+    max-width: 800px;
+}
