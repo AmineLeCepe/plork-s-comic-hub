@@ -1,3 +1,4 @@
 - Set up email validation
 - Test with one comic
 - Check security of post requests
+- Edit chapter/comic info
