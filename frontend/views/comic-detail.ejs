@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title><%= comic.title %></title>
+    <%- include("partials/head") %>
+    <style>
+        .comic-detail-container {
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+        .comic-detail-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+<%- include("partials/navbar") %>
+<div class="main-content">
+    <div class="comic-detail-container">
+        <h1><%= comic.title %></h1>
+        <img src="<%= comic.cover %>" alt="Cover of <%= comic.title %>">
+
+        <h2>Synopsis</h2>
+        <p><%= comic.synopsis %></p>
+
+        <h3>Tags</h3>
+        <ul>
+            <% comic.tags.forEach(tag => { %>
+                <li><%= tag %></li>
+            <% }); %>
+        </ul>
+
+        <p><strong>Release Date:</strong> <%= new Date(comic.releaseDate).toLocaleDateString() %></p>
+    </div>
+</div>
+
+<%- include("partials/scripts") %>
+</body>
+</html>

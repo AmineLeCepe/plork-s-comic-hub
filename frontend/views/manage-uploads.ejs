@@ -15,12 +15,14 @@
         <div class="uploads-container">
             <% if (myUploads && myUploads.length > 0) { %>
                 <% for(let comic of myUploads) { %>
-                    <div class="comic-thumbnail">
-                        <img src="<%= comic.cover %>" alt="<%= comic.title %>">
-                        <div class="comic-title-overlay">
-                            <span><%= comic.title %></span>
+                    <a href="/comic/<%= comic._id %>" style="text-decoration: none; color: inherit;">
+                        <div class="comic-thumbnail">
+                            <img src="<%= comic.cover %>" alt="<%= comic.title %>">
+                            <div class="comic-title-overlay">
+                                <span><%= comic.title %></span>
+                            </div>
                         </div>
-                    </div>
+                    </a>
                 <% } %>
             <% } else { %>
                 <p class="no-comics-message">No comics uploaded</p>

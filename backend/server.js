@@ -181,6 +181,21 @@ app.get('/manage-uploads', ensureAuthenticated, async (req, res) => {
     }
 });
 
+app.get('/manage-uploads/comic/:id', async (req, res) => {
+    try {
+        const comic = await models.Comic.findById(req.params.id);
+        if (comic) {
+            res.render('comic-detail', { comic });
+        } else {
+            res.status(404).render('404');
+        }
+    } catch (error) {
+        console.error('Error fetching comic details:', error);
+        res.status(500).send("Error loading comic page.");
+    }
+});
+
+
 
 app.get('/reset-password/:token', async (req, res) => {
     try {
