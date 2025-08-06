@@ -3,37 +3,59 @@
 <head>
     <title><%= comic.title %></title>
     <%- include("partials/head") %>
-    <style>
-        .comic-detail-container {
-            padding: 20px;
-            max-width: 800px;
-            margin: auto;
-        }
-        .comic-detail-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
-    </style>
+    <link rel="stylesheet" href="/css/comic-detail.css">
 </head>
 <body>
 <%- include("partials/navbar") %>
 <div class="main-content">
-    <div class="comic-detail-container">
-        <h1><%= comic.title %></h1>
-        <img src="<%= comic.cover %>" alt="Cover of <%= comic.title %>">
+    <%- include("partials/navbar2") %>
+    <div class="comic-detail-page-container">
+        <div class="top-layout">
+            <!-- Comic Details Container -->
+            <div class="detail-card comic-details-card">
+                <div class="details-content">
+                    <div class="comic-cover">
+                        <img src="<%= comic.cover %>" alt="Cover of <%= comic.title %>">
+                    </div>
+                    <div class="comic-info">
+                        <h1><%= comic.title %></h1>
+                        <% if (comic.author) { %>
+                            <p><strong>Author:</strong> <%= comic.author.username %></p>
+                        <% } %>
+                        <h3>Synopsis</h3>
+                        <p><%= comic.synopsis %></p>
+                        <h3>Tags</h3>
+                        <ul class="tags-list">
+                            <% comic.tags.forEach(tag => { %>
+                                <li><%= tag %></li>
+                            <% }); %>
+                        </ul>
+                        <p><strong>Release Date:</strong> <%= new Date(comic.releaseDate).toLocaleDateString() %></p>
+                    </div>
+                </div>
+            </div>
 
-        <h2>Synopsis</h2>
-        <p><%= comic.synopsis %></p>
+            <!-- Stats Container -->
+            <div class="detail-card stats-card">
+                <h2>Stats</h2>
+                <ul>
+                    <li><span>Views:</span> <strong><%= comic.stats.views %></strong></li>
+                    <li><span>Bookmarks:</span> <strong><%= comic.stats.bookmarks %></strong></li>
+                    <li><span>Likes:</span> <strong><%= comic.stats.likes %></strong></li>
+                    <li><span>Comments:</span> <strong><%= comic.stats.comments %></strong></li>
+                </ul>
+            </div>
+        </div>
 
-        <h3>Tags</h3>
-        <ul>
-            <% comic.tags.forEach(tag => { %>
-                <li><%= tag %></li>
-            <% }); %>
-        </ul>
-
-        <p><strong>Release Date:</strong> <%= new Date(comic.releaseDate).toLocaleDateString() %></p>
+        <!-- Chapters Container -->
+        <div class="detail-card chapters-card">
+            <h2>Chapters</h2>
+            <% if (comic.chapters && comic.chapters.length > 0) { %>
+                <!-- Chapter listing can go here -->
+            <% } else { %>
+                <p>No chapters have been uploaded yet.</p>
+            <% } %>
+        </div>
     </div>
 </div>
 
