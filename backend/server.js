@@ -13,6 +13,7 @@ const axios = require('axios');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
+const { storage } = require('./config/cloudinary');
 const { google } = require('googleapis');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
@@ -406,7 +407,10 @@ app.post('/reset-password/:token', async (req, res) => {
 });
 
 app.post('/manage-uploads/create-comic', upload.single('cover'),async (req, res) => {
-    console.log(req.body);
+    // Debugging line to check if the form data is being received
+    console.log("Form body: ", req.body);
+    // Debugging line to check if the file is being received
+    console.log("Comic cover:", req.file);
     res.redirect('/manage-uploads');
 })
 /// 404 error handler
