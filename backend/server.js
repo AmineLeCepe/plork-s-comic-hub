@@ -27,7 +27,7 @@ const queries = require('./queries');
 const app = express();
 connectDB();
 
-const upload = multer();
+const upload = multer({storage});
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -406,13 +406,50 @@ app.post('/reset-password/:token', async (req, res) => {
     }
 });
 
-app.post('/manage-uploads/create-comic', upload.single('cover'),async (req, res) => {
-    // Debugging line to check if the form data is being received
-    console.log("Form body: ", req.body);
-    // Debugging line to check if the file is being received
-    console.log("Comic cover:", req.file);
+app.post('/manage-uploads/create-comic', upload.single('cover'), async (req, res) => {
+    try {
+        // 1. Check if a cover image was uploaded
+        if (!req.file) {
+            req.flash('error', 'A cover image is required.');
+            return res.redirect('/manage-uploads');
+        }
+
+        // 2. Extract data from the request
+        const { title, synopsis, tags, releaseDate } = req.body;
+        const coverUrl = req.file.path; // URL from Cloudinary
+        const authorId = req.user._id; // Get the logged-in user's ID
+
+        // 3. Prepare the data for the database
+        const comicData = {
+            title,
+            author: authorId,
+            cover: coverUrl,
+            releaseDate,
+            synopsis: synopsis || '',
+            // Split tags string into an array, trimming whitespace
+            tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
+            // Checkboxes will not be in req.body if unchecked, so default to false
+            nsfw: !!req.body.nsfw,
+            paywalled: !!req.body.paywalled
+        };
+
+        // 4. Use the query to add the comic to the database
+        const result = await queries.comicQueries.addComic(comicData);
+
+        if (result.success) {
+            req.flash('success', 'Comic created successfully!');
+        } else {
+            req.flash('error', result.error);
+        }
+
+    } catch (error) {
+        console.error('Failed to create comic:', error);
+        req.flash('error', 'An unexpected error occurred.');
+    }
+
     res.redirect('/manage-uploads');
-})
+});
+
 /// 404 error handler
 
 app.use((req, res) => {
