@@ -1,0 +1,44 @@
+<div class="modal" id="modal">
+    <div class="modal-inner">
+        <h2>Create New Chapter</h2>
+        <form class="new-comic-form" action="/comic/<%= comic._id %>/create-chapter" method="POST" enctype="multipart/form-data" style="display: block;">
+
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            <div class="form-group">
+                <label for="chapterNumber">Chapter Number</label>
+                <input type="number" id="chapterNumber" name="chapterNumber" required>
+            </div>
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" name="description" rows="4"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="releaseDate">Release Date</label>
+                <input type="date" id="releaseDate" name="releaseDate" required>
+            </div>
+            <div class="form-group">
+                <label for="pages">Pages (select multiple)</label>
+                <input type="file" id="pages" name="pages" accept="image/*" multiple required>
+            </div>
+            <div class="checkbox-group">
+                <div class="checkbox-item">
+                    <input type="checkbox" id="nsfw" name="nsfw">
+                    <label for="nsfw">NSFW</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="paywalled" name="paywalled">
+                    <label for="paywalled">Paywalled</label>
+                </div>
+            </div>
+
+            <!-- Form-level actions -->
+            <div class="form-actions">
+                <button type="button" id="closeModal" class="cancel-btn">Cancel</button>
+                <button type="submit" class="submit-btn">Create Chapter</button>
+            </div>
+        </form>
+    </div>
+</div>

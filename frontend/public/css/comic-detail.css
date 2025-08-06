@@ -117,3 +117,188 @@ body, .main-content {
     border-radius: 15px;
     font-size: 0.9rem;
 }
+
+.new-comic-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0 0 20px;
+    padding: 12px 24px;
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.new-comic-btn:hover {
+    background-color: #555;
+}
+
+/* new comic modal section */
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Hide by default */
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.modal.open {
+    opacity: 1;
+    z-index: 999; /* Bring to front when open */
+}
+
+.modal-inner {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px; /* Consistent with auth forms */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-inner h2 {
+    font-size: 1.75rem;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.modal-inner p {
+    color: #555;
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+#closeModal {
+    background-color: #444444;
+    color: white;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+#closeModal:hover {
+    background-color: #333333;
+}
+
+/* New Comic Form styling */
+.new-comic-form {
+    display: grid;
+    gap: 30px;
+    text-align: left;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    font-weight: bold;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+    width: 100%;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #444;
+    outline: none;
+}
+
+textarea {
+    resize: vertical;
+}
+
+/* Checkbox styling */
+.checkbox-group {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.checkbox-item input[type="checkbox"] {
+    width: auto;
+    accent-color: #444;
+}
+
+.checkbox-item label {
+    font-weight: normal;
+    color: #333;
+}
+
+/* Form actions (buttons) */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+    border-top: 1px solid #eee;
+    padding-top: 20px;
+}
+
+.cancel-btn, .submit-btn {
+    border: none;
+    padding: 12px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.submit-btn {
+    background-color: #444444;
+    color: white;
+}
+.submit-btn:hover {
+    background-color: #333333;
+}
+.cancel-btn {
+    background-color: #f1f1f1;
+    color: #555;
+    border: 1px solid #ddd;
+}
+.cancel-btn:hover {
+    background-color: #e5e5e5;
+}
