@@ -160,9 +160,27 @@ app.get('/logout', (req, res) => {
     });
 })
 
-app.get('/manage-uploads', ensureAuthenticated, (req, res) => {
-    res.render('manage-uploads');
-})
+app.get('/manage-uploads', ensureAuthenticated, async (req, res) => {
+    try {
+        const authorId = req.user._id;
+        const result = await queries.comicQueries.getComicsByAuthor(authorId);
+
+        if (result.success) {
+            // Pass the fetched comics to the EJS template
+            res.render('manage-uploads', { myUploads: result.comics });
+        } else {
+            // If there's an error, show a message and render with no comics
+            req.flash('error', result.error);
+            res.render('manage-uploads', { myUploads: [] });
+        }
+    } catch (error) {
+        console.error('Failed to load the uploads page:', error);
+        req.flash('error', 'An unexpected error occurred while loading your uploads.');
+        // Redirect to the homepage as a fallback
+        res.redirect('/');
+    }
+});
+
 
 app.get('/reset-password/:token', async (req, res) => {
     try {
