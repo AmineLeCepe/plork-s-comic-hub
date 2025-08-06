@@ -12,6 +12,7 @@ const configPassport = require('./config/passport');
 const axios = require('axios');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+const multer = require('multer');
 const { google } = require('googleapis');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
@@ -24,6 +25,8 @@ const queries = require('./queries');
 // App config
 const app = express();
 connectDB();
+
+const upload = multer();
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -402,6 +405,10 @@ app.post('/reset-password/:token', async (req, res) => {
     }
 });
 
+app.post('/manage-uploads/create-comic', upload.single('cover'),async (req, res) => {
+    console.log(req.body);
+    res.redirect('/manage-uploads');
+})
 /// 404 error handler
 
 app.use((req, res) => {
