@@ -168,7 +168,7 @@ body, .main-content {
     border-radius: 10px;
     padding: 40px;
     width: 100%;
-    max-width: 500px; /* Consistent with auth forms */
+    max-width: 900px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     text-align: center;
     max-height: 90vh;
@@ -302,4 +302,74 @@ textarea {
 }
 .cancel-btn:hover {
     background-color: #e5e5e5;
+}
+
+/* Styles for image preview in the modal */
+#image-preview-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 20px;
+    margin-top: 15px;
+    border: 1px dashed #ccc;
+    padding: 20px;
+    border-radius: 5px;
+    min-height: 100px;
+}
+
+.preview-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background-color: #f9f9f9;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.preview-item img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.preview-item .order-label {
+    font-weight: bold;
+    font-size: 0.9rem;
+    color: #333;
+    text-align: center;
+}
+
+.preview-item .swap-buttons {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.preview-item .swap-btn {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+.preview-item .swap-btn:hover:not(:disabled) {
+    background-color: #f0f0f0;
+    border-color: #bbb;
+}
+
+.preview-item .swap-btn:disabled {
+    background-color: #f5f5f5;
+    color: #ccc;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
 }

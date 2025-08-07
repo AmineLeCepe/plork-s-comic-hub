@@ -67,13 +67,204 @@
     const closeBtn = document.getElementById("closeModal");
     const modal = document.getElementById("modal");
 
-    openBtn.addEventListener("click", function() {
+    const pagesInput = document.getElementById('pages');
+    const previewContainer = document.getElementById('image-preview-container');
+    const form = document.querySelector('.new-comic-form');
+
+    // Ordered list of items: { file: File, url: string }
+    let items = [];
+    // Track created object URLs so we can revoke them
+    let urlsToRevoke = [];
+
+    // Modal open/close
+    openBtn.addEventListener("click", () => {
         modal.classList.add("open");
     });
 
-    closeBtn.addEventListener("click", function() {
+    closeBtn.addEventListener("click", () => {
         modal.classList.remove("open");
+        hardReset();
     });
+
+    window.addEventListener('beforeunload', () => {
+        revokeAllURLs();
+    });
+
+    // Handle file selection
+    pagesInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files || []);
+        hardReset(); // clear previous previews and URLs
+
+        if (files.length === 0) return;
+
+        // Build items once using object URLs (fast and synchronous)
+        items = files.map((file) => {
+            const url = URL.createObjectURL(file);
+            urlsToRevoke.push(url);
+            return { file, url };
+        });
+
+        renderPreviewsOnce();
+    });
+
+    // Render thumbnails once in order
+    function renderPreviewsOnce() {
+        previewContainer.innerHTML = '';
+        const frag = document.createDocumentFragment();
+
+        items.forEach((it, index) => {
+            frag.appendChild(createPreviewElement(it.url, index));
+        });
+
+        previewContainer.appendChild(frag);
+        updateAllLabelsAndButtons();
+    }
+
+    // Create a single preview element
+    function createPreviewElement(url, index) {
+        const item = document.createElement('div');
+        item.className = 'preview-item';
+        item.dataset.index = String(index);
+
+        const img = document.createElement('img');
+        img.src = url;
+        img.loading = 'lazy';
+        item.appendChild(img);
+
+        const orderLabel = document.createElement('div');
+        orderLabel.className = 'order-label';
+        orderLabel.textContent = `Page ${index + 1}`;
+        item.appendChild(orderLabel);
+
+        const swapButtons = document.createElement('div');
+        swapButtons.className = 'swap-buttons';
+
+        const leftBtn = document.createElement('button');
+        leftBtn.type = 'button';
+        leftBtn.className = 'swap-btn';
+        leftBtn.dataset.dir = '-1';
+        leftBtn.textContent = '◀';
+        swapButtons.appendChild(leftBtn);
+
+        const rightBtn = document.createElement('button');
+        rightBtn.type = 'button';
+        rightBtn.className = 'swap-btn';
+        rightBtn.dataset.dir = '1';
+        rightBtn.textContent = '▶';
+        swapButtons.appendChild(rightBtn);
+
+        item.appendChild(swapButtons);
+        return item;
+    }
+
+    // Event delegation for swapping
+    previewContainer.addEventListener('click', (evt) => {
+        const btn = evt.target.closest('.swap-btn');
+        if (!btn) return;
+
+        const dir = Number(btn.dataset.dir);
+        const itemEl = btn.closest('.preview-item');
+        if (!itemEl) return;
+
+        const fromIndex = Array.prototype.indexOf.call(previewContainer.children, itemEl);
+        const toIndex = fromIndex + dir;
+
+        if (toIndex < 0 || toIndex >= items.length) return;
+
+        swap(fromIndex, toIndex);
+    });
+
+    // Swap items and DOM nodes, then refresh labels and disabled states
+    function swap(i, j) {
+        if (i === j) return;
+
+        // Swap data
+        [items[i], items[j]] = [items[j], items[i]];
+
+        // Swap DOM nodes in place (no re-render)
+        const nodeA = previewContainer.children[i];
+        const nodeB = previewContainer.children[j];
+        swapNodes(nodeA, nodeB);
+
+        // Fix labels and disabled states
+        updateAllLabelsAndButtons();
+    }
+
+    function swapNodes(a, b) {
+        const parent = a.parentNode;
+        const aNext = a.nextSibling;
+        const bNext = b.nextSibling;
+
+        // Insert b where a was
+        if (aNext === b) {
+            parent.insertBefore(b, a);
+        } else if (bNext === a) {
+            parent.insertBefore(a, b);
+        } else {
+            parent.insertBefore(b, aNext);
+            parent.insertBefore(a, bNext);
+        }
+    }
+
+    function updateAllLabelsAndButtons() {
+        const children = Array.from(previewContainer.children);
+        const lastIndex = children.length - 1;
+
+        children.forEach((el, idx) => {
+            el.dataset.index = String(idx);
+
+            const label = el.querySelector('.order-label');
+            if (label) label.textContent = `Page ${idx + 1}`;
+
+            const btns = el.querySelectorAll('.swap-btn');
+            if (btns[0]) btns[0].disabled = idx === 0;            // left
+            if (btns[1]) btns[1].disabled = idx === lastIndex;   // right
+        });
+    }
+
+    // Form submit with correct order
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (items.length === 0) {
+            alert('Please upload at least one page.');
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.delete('pages');
+
+        // Append files in current order (left-to-right, top-to-bottom)
+        items.forEach(({ file }) => formData.append('pages', file));
+
+        try {
+            const res = await fetch(form.action, { method: 'POST', body: formData });
+            if (res.ok) {
+                // Free memory before navigating
+                revokeAllURLs();
+                window.location.reload();
+            } else {
+                const msg = await res.text();
+                alert(`Error submitting form: ${msg}`);
+            }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred during submission.');
+        }
+    });
+
+    // Utilities
+    function revokeAllURLs() {
+        urlsToRevoke.forEach(url => URL.revokeObjectURL(url));
+        urlsToRevoke = [];
+    }
+
+    function hardReset() {
+        revokeAllURLs();
+        items = [];
+        previewContainer.innerHTML = '';
+        form.reset();
+    }
 </script>
 
 <%- include("partials/scripts") %>
