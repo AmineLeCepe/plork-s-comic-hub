@@ -1,7 +1,7 @@
 <div class="modal" id="modal">
     <div class="modal-inner">
         <h2>Create New Chapter</h2>
-        <form class="new-comic-form" action="/comic/<%= comic._id %>/create-chapter" method="POST" enctype="multipart/form-data" style="display: block;">
+        <form class="new-comic-form" action="/comic/<%= comic._id %>/create-chapter" method="POST" enctype="multipart/form-data" style="display: block;" novalidate>
 
             <div class="form-group">
                 <label for="title">Title</label>
