@@ -63,9 +63,9 @@
 <%- include("partials/new-chapter-modal.ejs", { comic: comic }) %>
 
 <script>
-    const modal = document.getElementById("modal");
     const openBtn = document.getElementById("openModal");
     const closeBtn = document.getElementById("closeModal");
+    const modal = document.getElementById("modal");
 
     const pagesInput = document.getElementById('pages');
     const previewContainer = document.getElementById('image-preview-container');
@@ -76,50 +76,39 @@
     // Track created object URLs so we can revoke them
     let urlsToRevoke = [];
 
-    // Ensure native validation is disabled (backup to novalidate on the form tag)
-    if (form) form.setAttribute('novalidate', '');
+    // Modal open/close
+    openBtn.addEventListener("click", () => {
+        modal.classList.add("open");
+    });
 
-    // Modal open/close (guarded)
-    if (openBtn && modal) {
-        openBtn.addEventListener("click", () => {
-            modal.classList.add("open");
-        });
-    }
-
-    if (closeBtn && modal) {
-        closeBtn.addEventListener("click", () => {
-            modal.classList.remove("open");
-            resetFormAndPreviews();
-        });
-    }
+    closeBtn.addEventListener("click", () => {
+        modal.classList.remove("open");
+        hardReset();
+    });
 
     window.addEventListener('beforeunload', () => {
         revokeAllURLs();
     });
 
-    // Handle file selection WITHOUT resetting the form
-    if (pagesInput && previewContainer) {
-        pagesInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files || []);
+    // Handle file selection
+    pagesInput.addEventListener('change', (e) => {
+        const files = Array.from(e.target.files || []);
+        hardReset(); // clear previous previews and URLs
 
-            // Only clear previews/state, not the form fields
-            clearPreviewsAndState();
+        if (files.length === 0) return;
 
-            if (files.length === 0) return;
-
-            items = files.map((file) => {
-                const url = URL.createObjectURL(file);
-                urlsToRevoke.push(url);
-                return { file, url };
-            });
-
-            renderPreviewsOnce();
+        // Build items once using object URLs (fast and synchronous)
+        items = files.map((file) => {
+            const url = URL.createObjectURL(file);
+            urlsToRevoke.push(url);
+            return { file, url };
         });
-    }
+
+        renderPreviewsOnce();
+    });
 
     // Render thumbnails once in order
     function renderPreviewsOnce() {
-        if (!previewContainer) return;
         previewContainer.innerHTML = '';
         const frag = document.createDocumentFragment();
 
@@ -168,33 +157,36 @@
         return item;
     }
 
-    // Event delegation for swapping (guarded)
-    if (previewContainer) {
-        previewContainer.addEventListener('click', (evt) => {
-            const btn = evt.target.closest('.swap-btn');
-            if (!btn) return;
+    // Event delegation for swapping
+    previewContainer.addEventListener('click', (evt) => {
+        const btn = evt.target.closest('.swap-btn');
+        if (!btn) return;
 
-            const dir = Number(btn.dataset.dir);
-            const itemEl = btn.closest('.preview-item');
-            if (!itemEl) return;
+        const dir = Number(btn.dataset.dir);
+        const itemEl = btn.closest('.preview-item');
+        if (!itemEl) return;
 
-            const fromIndex = Array.prototype.indexOf.call(previewContainer.children, itemEl);
-            const toIndex = fromIndex + dir;
+        const fromIndex = Array.prototype.indexOf.call(previewContainer.children, itemEl);
+        const toIndex = fromIndex + dir;
 
-            if (toIndex < 0 || toIndex >= items.length) return;
+        if (toIndex < 0 || toIndex >= items.length) return;
 
-            swap(fromIndex, toIndex);
-        });
-    }
+        swap(fromIndex, toIndex);
+    });
 
+    // Swap items and DOM nodes, then refresh labels and disabled states
     function swap(i, j) {
         if (i === j) return;
+
+        // Swap data
         [items[i], items[j]] = [items[j], items[i]];
 
-        const nodeA = previewContainer?.children[i];
-        const nodeB = previewContainer?.children[j];
-        if (!nodeA || !nodeB) return;
+        // Swap DOM nodes in place (no re-render)
+        const nodeA = previewContainer.children[i];
+        const nodeB = previewContainer.children[j];
         swapNodes(nodeA, nodeB);
+
+        // Fix labels and disabled states
         updateAllLabelsAndButtons();
     }
 
@@ -203,6 +195,7 @@
         const aNext = a.nextSibling;
         const bNext = b.nextSibling;
 
+        // Insert b where a was
         if (aNext === b) {
             parent.insertBefore(b, a);
         } else if (bNext === a) {
@@ -214,7 +207,6 @@
     }
 
     function updateAllLabelsAndButtons() {
-        if (!previewContainer) return;
         const children = Array.from(previewContainer.children);
         const lastIndex = children.length - 1;
 
@@ -225,89 +217,41 @@
             if (label) label.textContent = `Page ${idx + 1}`;
 
             const btns = el.querySelectorAll('.swap-btn');
-            if (btns[0]) btns[0].disabled = idx === 0;
-            if (btns[1]) btns[1].disabled = idx === lastIndex;
+            if (btns[0]) btns[0].disabled = idx === 0;            // left
+            if (btns[1]) btns[1].disabled = idx === lastIndex;   // right
         });
-    }
-
-    // Simple manual validation for required fields
-    function validateRequiredFields() {
-        if (!form) return false;
-
-        const title = form.querySelector('#title');
-        const chapterNumber = form.querySelector('#chapterNumber');
-        const releaseDate = form.querySelector('#releaseDate');
-
-        if (!title?.value.trim()) {
-            alert('Title is required.');
-            title?.focus();
-            return false;
-        }
-        if (!chapterNumber?.value) {
-            alert('Chapter Number is required.');
-            chapterNumber?.focus();
-            return false;
-        }
-        if (!releaseDate?.value) {
-            alert('Release Date is required.');
-            releaseDate?.focus();
-            return false;
-        }
-        if (items.length === 0) {
-            alert('Please upload at least one page.');
-            pagesInput?.focus();
-            return false;
-        }
-        return true;
     }
 
     // Form submit with correct order
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            if (!validateRequiredFields()) return;
+        if (items.length === 0) {
+            alert('Please upload at least one page.');
+            return;
+        }
 
-            const formData = new FormData(form);
-            formData.delete('pages');
+        const formData = new FormData(form);
+        formData.delete('pages');
 
-            // Append files in current order
-            items.forEach(({ file }) => formData.append('pages', file));
+        // Append files in current order (left-to-right, top-to-bottom)
+        items.forEach(({ file }) => formData.append('pages', file));
 
-            const submitBtn = form.querySelector('[type="submit"]');
-            if (submitBtn) submitBtn.disabled = true;
-
-            try {
-                const res = await fetch(form.action, { method: 'POST', body: formData });
-
-                if (res.redirected) {
-                    window.location.href = res.url;
-                    return;
-                }
-
-                let data = null;
-                try { data = await res.clone().json(); } catch (_) {}
-
-                if (res.ok) {
-                    if (data && (data.redirect || data.url || data.location)) {
-                        window.location.href = data.redirect || data.url || data.location;
-                        return;
-                    }
-                    window.location.reload();
-                } else {
-                    const msg = data?.message || (await res.text());
-                    alert(`Error submitting form: ${msg}`);
-                }
-            } catch (err) {
-                console.error(err);
-                alert('An error occurred during submission.');
-            } finally {
-                if (submitBtn) submitBtn.disabled = false;
+        try {
+            const res = await fetch(form.action, { method: 'POST', body: formData });
+            if (res.ok) {
+                // Free memory before navigating
+                revokeAllURLs();
+                window.location.reload();
+            } else {
+                const msg = await res.text();
+                alert(`Error submitting form: ${msg}`);
             }
-        });
-    } else {
-        console.warn('New chapter form not found on this page.');
-    }
+        } catch (err) {
+            console.error(err);
+            alert('An error occurred during submission.');
+        }
+    });
 
     // Utilities
     function revokeAllURLs() {
@@ -315,17 +259,11 @@
         urlsToRevoke = [];
     }
 
-    // Clear previews/state without touching form field values
-    function clearPreviewsAndState() {
+    function hardReset() {
         revokeAllURLs();
         items = [];
-        if (previewContainer) previewContainer.innerHTML = '';
-    }
-
-    // Full reset, used on modal close
-    function resetFormAndPreviews() {
-        clearPreviewsAndState();
-        if (form) form.reset();
+        previewContainer.innerHTML = '';
+        form.reset();
     }
 </script>
 

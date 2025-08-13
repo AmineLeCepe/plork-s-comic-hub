@@ -483,42 +483,6 @@ app.post('/manage-uploads/create-comic', upload.single('cover'), async (req, res
     res.redirect('/manage-uploads');
 });
 
-// Add this near other POST routes, before the 404 handler.
-const chapterUpload = multer({ storage: multer.memoryStorage() });
-
-app.post('/comic/:id/create-chapter', chapterUpload.array('pages'), async (req, res) => {
-    try {
-        const { title, chapterNumber, description, releaseDate } = req.body;
-        const nsfw = !!req.body.nsfw;
-        const paywalled = !!req.body.paywalled;
-
-        const pages = (req.files || []).map((f, idx) => ({
-            index: idx,
-            originalname: f.originalname,
-            mimetype: f.mimetype,
-            size: f.size
-            // For debugging, you could also log buffer length:
-            // bufferLength: f.buffer?.length || 0
-        }));
-
-        console.log('Create Chapter payload:', {
-            comicId: req.params.id,
-            title,
-            chapterNumber,
-            description,
-            releaseDate,
-            nsfw,
-            paywalled,
-            pages
-        });
-
-        res.status(200).json({ ok: true, message: 'Received. Check server logs.' });
-    } catch (err) {
-        console.error('Error logging chapter payload:', err);
-        res.status(500).send('Failed to log chapter payload.');
-    }
-});
-
 /// 404 error handler
 
 app.use((req, res) => {
