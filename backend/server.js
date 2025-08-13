@@ -21,6 +21,9 @@ const { cloudinary } = require('./config/cloudinary'); // <-- Make sure this is 
 const { google } = require('googleapis');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
+// JavaScript
+// Add with other requires at the top
+const sharp = require('sharp');
 
 // Database imports
 const models = require('./models');
@@ -454,17 +457,15 @@ const coverMemoryUpload = multer({
   }
 });
 
-// JavaScript
-// Keep your existing imports and coverMemoryUpload
-
-// Helper: upload a single buffer to Cloudinary (no use_filename/unique_filename here)
+// Helper: upload a single buffer to Cloudinary (store as webp)
 function uploadBufferToCloudinary(buffer, options = {}) {
   return new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
       {
         folder: 'comic_thumbnails',
         resource_type: 'image',
-        format: 'jpg',
+        format: 'webp',         // store as webp
+        quality: 'auto:eco',    // smaller original on Cloudinary side
         overwrite: false,
         ...options
       },
@@ -474,6 +475,7 @@ function uploadBufferToCloudinary(buffer, options = {}) {
   });
 }
 
+// Create comic route (optimize -> upload -> save)
 app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), async (req, res) => {
   try {
     if (!req.file) {
@@ -481,13 +483,16 @@ app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), asyn
       return res.redirect('/manage-uploads');
     }
 
-    // Create a unique, collision-resistant public_id for each upload
-    const uniquePublicId = `cover_${req.user._id}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    // 1) Optimize to WebP to save space
+    const optimized = await sharp(req.file.buffer)
+      .rotate() // respect EXIF orientation
+      .resize({ width: 1600, withoutEnlargement: true }) // cap width for covers
+      .webp({ quality: 75 }) // balanced quality for good savings
+      .toBuffer();
 
-    // Pass the unique public_id explicitly
-    const uploadRes = await uploadBufferToCloudinary(req.file.buffer, {
-      public_id: uniquePublicId
-    });
+    // 2) Upload to Cloudinary with a unique public_id
+    const uniquePublicId = `cover_${req.user._id}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const uploadRes = await uploadBufferToCloudinary(optimized, { public_id: uniquePublicId });
 
     const coverUrl = uploadRes?.secure_url;
     if (!coverUrl) {
@@ -495,9 +500,8 @@ app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), asyn
       return res.redirect('/manage-uploads');
     }
 
+    // 3) Save to DB
     const { title, synopsis, tags, releaseDate } = req.body;
-    const authorId = req.user._id;
-
     const release = new Date(releaseDate);
     if (Number.isNaN(release.getTime())) {
       req.flash('error', 'Invalid release date.');
@@ -506,7 +510,7 @@ app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), asyn
 
     const comicData = {
       title: (title || '').trim(),
-      author: authorId,
+      author: req.user._id,
       cover: coverUrl,
       releaseDate: release,
       synopsis: (synopsis || '').trim(),
@@ -519,7 +523,7 @@ app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), asyn
     if (result?.success) {
       req.flash('success', 'Comic created successfully!');
     } else {
-      const errMsg = (result && (result.error?.message || result.error)) || 'Failed to create comic.';
+      const errMsg = (result?.error?.message || result?.error) || 'Failed to create comic.';
       console.error('[create-comic] DB save failed:', errMsg);
       req.flash('error', typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
     }
