@@ -1,3 +1,4 @@
+// JavaScript
 // Dependencies
 const express = require('express');
 const path = require('path');
@@ -13,7 +14,10 @@ const axios = require('axios');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
-const { storage } = require('./config/cloudinary');
+// Remove storage import and unused upload instance to avoid side effects
+// const { storage } = require('./config/cloudinary');
+// const upload = multer({storage});
+const { cloudinary } = require('./config/cloudinary'); // <-- Make sure this is present
 const { google } = require('googleapis');
 const { ensureAuthenticated, forwardAuthenticated } = require('./middleware/auth');
 require('dotenv').config();
@@ -26,8 +30,6 @@ const queries = require('./queries');
 // App config
 const app = express();
 connectDB();
-
-const upload = multer({storage});
 
 // Set EJS as the view engine
 app.set('view engine', 'ejs');
@@ -439,48 +441,94 @@ app.post('/reset-password/:token', async (req, res) => {
     }
 });
 
-app.post('/manage-uploads/create-comic', upload.single('cover'), async (req, res) => {
-    try {
-        // 1. Check if a cover image was uploaded
-        if (!req.file) {
-            req.flash('error', 'A cover image is required.');
-            return res.redirect('/manage-uploads');
-        }
+// JavaScript
+// 1) Add a dedicated memory-based uploader for the cover
+const coverMemoryUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: (Number(process.env.MAX_UPLOAD_MB || 10)) * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+      return cb(new Error('Invalid file type. Only image files are allowed.'));
+    }
+    cb(null, true);
+  }
+});
 
-        // 2. Extract data from the request
-        const { title, synopsis, tags, releaseDate } = req.body;
-        const coverUrl = req.file.path; // URL from Cloudinary
-        const authorId = req.user._id; // Get the logged-in user's ID
+// JavaScript
+// Keep your existing imports and coverMemoryUpload
 
-        // 3. Prepare the data for the database
-        const comicData = {
-            title,
-            author: authorId,
-            cover: coverUrl,
-            releaseDate,
-            synopsis: synopsis || '',
-            // Split tags string into an array, trimming whitespace
-            tags: tags ? tags.split(',').map(tag => tag.trim()) : [],
-            // Checkboxes will not be in req.body if unchecked, so default to false
-            nsfw: !!req.body.nsfw,
-            paywalled: !!req.body.paywalled
-        };
+// Helper: upload a single buffer to Cloudinary (no use_filename/unique_filename here)
+function uploadBufferToCloudinary(buffer, options = {}) {
+  return new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: 'comic_thumbnails',
+        resource_type: 'image',
+        format: 'jpg',
+        overwrite: false,
+        ...options
+      },
+      (err, result) => (err ? reject(err) : resolve(result))
+    );
+    stream.end(buffer);
+  });
+}
 
-        // 4. Use the query to add the comic to the database
-        const result = await queries.comicQueries.addComic(comicData);
-
-        if (result.success) {
-            req.flash('success', 'Comic created successfully!');
-        } else {
-            req.flash('error', result.error);
-        }
-
-    } catch (error) {
-        console.error('Failed to create comic:', error);
-        req.flash('error', 'An unexpected error occurred.');
+app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), async (req, res) => {
+  try {
+    if (!req.file) {
+      req.flash('error', 'A cover image is required.');
+      return res.redirect('/manage-uploads');
     }
 
-    res.redirect('/manage-uploads');
+    // Create a unique, collision-resistant public_id for each upload
+    const uniquePublicId = `cover_${req.user._id}_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+    // Pass the unique public_id explicitly
+    const uploadRes = await uploadBufferToCloudinary(req.file.buffer, {
+      public_id: uniquePublicId
+    });
+
+    const coverUrl = uploadRes?.secure_url;
+    if (!coverUrl) {
+      req.flash('error', 'Upload succeeded but no URL was returned from Cloudinary.');
+      return res.redirect('/manage-uploads');
+    }
+
+    const { title, synopsis, tags, releaseDate } = req.body;
+    const authorId = req.user._id;
+
+    const release = new Date(releaseDate);
+    if (Number.isNaN(release.getTime())) {
+      req.flash('error', 'Invalid release date.');
+      return res.redirect('/manage-uploads');
+    }
+
+    const comicData = {
+      title: (title || '').trim(),
+      author: authorId,
+      cover: coverUrl,
+      releaseDate: release,
+      synopsis: (synopsis || '').trim(),
+      tags: tags ? tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+      nsfw: !!req.body.nsfw,
+      paywalled: !!req.body.paywalled
+    };
+
+    const result = await queries.comicQueries.addComic(comicData);
+    if (result?.success) {
+      req.flash('success', 'Comic created successfully!');
+    } else {
+      const errMsg = (result && (result.error?.message || result.error)) || 'Failed to create comic.';
+      console.error('[create-comic] DB save failed:', errMsg);
+      req.flash('error', typeof errMsg === 'string' ? errMsg : JSON.stringify(errMsg));
+    }
+  } catch (err) {
+    console.error('[create-comic] error:', err);
+    req.flash('error', err?.message || 'An unexpected error occurred.');
+  }
+
+  return res.redirect('/manage-uploads');
 });
 
 /// 404 error handler
