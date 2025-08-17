@@ -1,7 +1,7 @@
 <div class="modal" id="modal">
     <div class="modal-inner">
         <h2>Create New Chapter</h2>
-        <form class="new-comic-form" action="/comic/<%= comic._id %>/create-chapter" method="POST" enctype="multipart/form-data" style="display: block;">
+        <form class="new-comic-form" action="/manage-uploads/create-chapter" method="POST" enctype="multipart/form-data" style="display: block;">
 
             <div class="form-group">
                 <label for="title">Title</label>
@@ -36,6 +36,7 @@
             </div>
 
             <!-- Form-level actions -->
+            <input type="hidden" name="comicId" value="<%= comic._id %>">
             <div class="form-actions">
                 <button type="button" id="closeModal" class="cancel-btn">Cancel</button>
                 <button type="submit" class="submit-btn">Create Chapter</button>

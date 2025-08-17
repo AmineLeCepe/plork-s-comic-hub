@@ -80,6 +80,8 @@ app.use((req, res, next) => {
 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Listening on port ${process.env.PORT || 3000}`);
+    console.log('MAX_PAGE_UPLOAD_MB=', process.env.MAX_UPLOAD_MB);
+
 })
 
 
@@ -535,6 +537,159 @@ app.post('/manage-uploads/create-comic', coverMemoryUpload.single('cover'), asyn
   return res.redirect('/manage-uploads');
 });
 
+// javascript
+// Add/replace these sections in server.js (place before your 404 handler)
+
+// 1) Multer memory uploader for pages (adjust limits as needed)
+const pagesMemoryUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    // per-file size limit (MB -> bytes)
+    fileSize: (Number(process.env.MAX_UPLOAD_MB || 10)) * 1024 * 1024,
+    // max number of files allowed in a single request
+    files: Number(process.env.MAX_PAGES || 100)
+  },
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+      return cb(new Error('Invalid file type. Only image files are allowed.'));
+    }
+    cb(null, true);
+  }
+});
+
+// 2) Helper to upload optimized buffer to Cloudinary (re-uses existing uploadBufferToCloudinary shape)
+function uploadOptimizedPageToCloudinary(buffer, options = {}) {
+  // Force folder and format by default; merge with caller options
+  return uploadBufferToCloudinary(buffer, {
+    folder: 'comic_pages',
+    resource_type: 'image',
+    format: 'webp',
+    quality: 'auto:good',
+    ...options
+  });
+}
+
+// 3) Route: accept multipart, compress (sharp) each file, upload to Cloudinary, persist chapter
+app.post('/manage-uploads/create-chapter',
+  ensureAuthenticated,
+  pagesMemoryUpload.array('pages'), // name matches your input (multiple)
+  async (req, res) => {
+    try {
+      console.log('[create-chapter] incoming request by user:', req.user?._id);
+
+      // Basic validation of body fields
+      const { title, chapterNumber, description, releaseDate } = req.body;
+      if (!title || !chapterNumber || !releaseDate) {
+        req.flash('error', 'Title, chapter number and release date are required.');
+        return res.redirect('back');
+      }
+
+      if (!Array.isArray(req.files) || req.files.length === 0) {
+        req.flash('error', 'Please attach at least one page image.');
+        return res.redirect('back');
+      }
+
+      // Process files sequentially or in limited concurrency to avoid memory spike.
+      // Here we do a small concurrency pool (3 at a time). Adjust as needed.
+      const CONCURRENCY = Number(process.env.PAGE_PROCESS_CONCURRENCY || 3);
+      const fileQueue = [...req.files];
+      const uploadedPageUrls = [];
+
+      async function processFile(file, index) {
+        // Convert/optimize using sharp
+        const optimizedBuffer = await sharp(file.buffer)
+          .rotate()
+          .resize({ width: 1600, withoutEnlargement: true }) // cap width
+          .webp({ quality: 80 }) // tune quality
+          .toBuffer();
+
+        const publicId = `comic_${req.body.comicId || 'unknown'}_chap_${Date.now()}_${Math.random().toString(36).slice(2,8)}_${index}`;
+        const uploadRes = await uploadOptimizedPageToCloudinary(optimizedBuffer, { public_id: publicId });
+        if (!uploadRes || !uploadRes.secure_url) {
+          throw new Error('Cloudinary did not return a URL for an uploaded page.');
+        }
+        return uploadRes.secure_url;
+      }
+
+      // Limited concurrency runner
+      async function runQueue() {
+        const workers = new Array(CONCURRENCY).fill(null).map(async () => {
+          while (fileQueue.length) {
+            const file = fileQueue.shift();
+            const idx = uploadedPageUrls.length; // order preserved by pushing in sequence
+            const url = await processFile(file, idx);
+            uploadedPageUrls.push(url);
+          }
+        });
+        await Promise.all(workers);
+      }
+
+      await runQueue();
+
+      // Build chapter object (adjust shape to your schema)
+      const chapter = {
+        title: String(title).trim(),
+        chapterNumber: Number(chapterNumber),
+        description: description ? String(description).trim() : '',
+        releaseDate: new Date(releaseDate),
+        pages: uploadedPageUrls,
+        nsfw: !!req.body.nsfw,
+        paywalled: !!req.body.paywalled,
+        createdAt: new Date()
+      };
+
+      // Save chapter to comic (adapt if chapters are stored in separate collection)
+      const comicId = req.body.comicId || req.body.comic || req.query.comicId;
+      if (!comicId) {
+        // If comic id isn't available via form, you probably expect it in the route or form -> adapt accordingly
+        req.flash('error', 'No comic id supplied.');
+        return res.redirect(`/manage-uploads/comic/${comic._id}`);
+      }
+
+      const comic = await models.Comic.findById(comicId);
+      if (!comic) {
+        req.flash('error', 'Comic not found.');
+        return res.redirect('/manage-uploads');
+      }
+
+      comic.chapters = comic.chapters || [];
+      comic.chapters.push(chapter);
+      await comic.save();
+
+      // JavaScript
+      // after saving the comic/chapter
+      req.flash('success', 'Chapter created successfully.');
+      return res.redirect(`/manage-uploads/comic/${comic._id}`);
+    } catch (err) {
+      console.error('[create-chapter] error:', err);
+      // If multer threw a MulterError it will be caught by the global multer error handler below,
+      // but we handle other errors here to provide feedback.
+      req.flash('error', err.message || 'Failed to create chapter.');
+      return res.redirect(`/manage-uploads/comic/${comic._id}`);
+    }
+  }
+);
+
+// 4) Multer error handler middleware (place after routes but before 404)
+// This sends a friendly message when Multer limits are hit.
+app.use((err, req, res, next) => {
+  if (err && err instanceof multer.MulterError) {
+    console.warn('[multer error]', err.code, err.message);
+    if (err.code === 'LIMIT_FILE_SIZE') {
+      req.flash('error', `One or more files exceed the max allowed size (${process.env.MAX_PAGE_UPLOAD_MB || 10} MB).`);
+      return res.redirect('back');
+    }
+    if (err.code === 'LIMIT_FILE_COUNT') {
+      req.flash('error', 'Too many files uploaded in a single request.');
+      return res.redirect('back');
+    }
+    // generic multer error
+    req.flash('error', err.message || 'File upload error.');
+    return res.redirect('back');
+  }
+  // Not a multer error, pass along
+  return next(err);
+});
 /// 404 error handler
 
 app.use((req, res) => {
