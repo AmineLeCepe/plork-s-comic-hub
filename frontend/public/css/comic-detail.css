@@ -373,3 +373,139 @@ textarea {
     cursor: not-allowed;
     border-color: #e0e0e0;
 }
+
+/* Chapters list styling (rows with thumbnail + info) */
+.chapters-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+/* Each chapter row: thumbnail on the left, info on the right */
+.chapter-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 1px solid #f0f0f0;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s;
+}
+
+/* hover/focus state for a subtle lift */
+.chapter-row:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    background-color: #fbfbfb;
+}
+
+/* Thumbnail container */
+.chapter-thumb {
+    width: 140px;
+    height: 96px;
+    flex: 0 0 140px;
+    border-radius: 6px;
+    overflow: hidden;
+    background-color: #f6f6f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Thumbnail image */
+.chapter-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+/* Placeholder shown when no thumbnail available */
+.thumb-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9aa0a6;
+    font-size: 0.9rem;
+    background: linear-gradient(180deg, #fafafa, #f5f5f5);
+    border: 1px dashed #e6e6e6;
+}
+
+/* Chapter info column */
+.chapter-info {
+    flex: 1;
+    min-width: 0; /* allow text truncation */
+}
+
+/* Link that wraps title and chapter number */
+.chapter-link {
+    display: inline-block;
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Title + chapter number */
+.chapter-link h3 {
+    margin: 0 0 6px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #222;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chapter-link p {
+    margin: 0;
+    color: #666;
+    font-size: 0.92rem;
+}
+
+/* Meta row for release date or other small info */
+.chapter-meta {
+    margin-top: 8px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+/* Make rows stack nicely on small screens */
+@media (max-width: 720px) {
+    .chapter-row {
+        gap: 12px;
+    }
+    .chapter-thumb {
+        width: 110px;
+        height: 80px;
+        flex: 0 0 110px;
+    }
+    .chapter-link h3 {
+        font-size: 1rem;
+    }
+}
+
+/* Very small screens: stack thumbnail above info */
+@media (max-width: 420px) {
+    .chapter-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .chapter-thumb {
+        width: 100%;
+        height: 160px;
+        flex: none;
+    }
+    .chapter-info {
+        padding-top: 8px;
+    }
+}
+
+/* Small utility to keep the "New Chapter" button aligned */
+.chapters-card .new-chapter-btn {
+    margin-top: 18px;
+}

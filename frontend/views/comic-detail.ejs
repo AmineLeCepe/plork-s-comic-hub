@@ -50,11 +50,39 @@
         <!-- Chapters Container -->
         <div class="detail-card chapters-card">
             <h2>Chapters</h2>
+
             <% if (comic.chapters && comic.chapters.length > 0) { %>
-                <!-- Chapter listing can go here -->
+                <div class="chapters-list">
+                    <% comic.chapters.forEach(function(chapter) { %>
+                        <div class="chapter-row">
+                            <div class="chapter-thumb">
+                                <% if (chapter.pages && chapter.pages.length > 0) { %>
+                                    <a href="/manage-uploads/comic/<%= comic._id %>/chapter/<%= chapter._id %>">
+                                        <img src="<%= chapter.pages[0] %>" alt="Page 1 of <%= chapter.title %>">
+                                    </a>
+                                <% } else { %>
+                                    <a href="/manage-uploads/comic/<%= comic._id %>/chapter/<%= chapter._id %>">
+                                        <div class="thumb-placeholder">No preview</div>
+                                    </a>
+                                <% } %>
+                            </div>
+
+                            <div class="chapter-info">
+                                <a class="chapter-link" href="/manage-uploads/comic/<%= comic._id %>/chapter/<%= chapter._id %>">
+                                    <h3><%= chapter.title %></h3>
+                                    <p>Chapter <%= chapter.chapterNumber %></p>
+                                </a>
+                                <% if (chapter.releaseDate) { %>
+                                    <p class="chapter-meta">Released: <%= new Date(chapter.releaseDate).toLocaleDateString() %></p>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
             <% } else { %>
                 <p>No chapters have been uploaded yet.</p>
             <% } %>
+
             <button class="new-chapter-btn" id="openModal">+ New Chapter</button>
         </div>
     </div>

@@ -190,7 +190,14 @@ app.get('/manage-uploads', ensureAuthenticated, async (req, res) => {
 
 app.get('/manage-uploads/comic/:id', async (req, res) => {
     try {
-        const comic = await models.Comic.findById(req.params.id);
+        // Populate author and chapters (chapters sorted by chapterNumber ascending)
+        const comic = await models.Comic.findById(req.params.id)
+            .populate('author', 'username') // only need username
+            .populate({
+                path: 'chapters',
+                options: { sort: { chapterNumber: 1 } } // show chapters in order
+            });
+
         if (comic) {
             res.render('comic-detail', { comic });
         } else {
