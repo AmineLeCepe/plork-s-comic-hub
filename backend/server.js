@@ -627,37 +627,43 @@ app.post('/manage-uploads/create-chapter',
       await runQueue();
 
       // Build chapter object (adjust shape to your schema)
-      const chapter = {
-        title: String(title).trim(),
-        chapterNumber: Number(chapterNumber),
-        description: description ? String(description).trim() : '',
-        releaseDate: new Date(releaseDate),
-        pages: uploadedPageUrls,
-        nsfw: !!req.body.nsfw,
-        paywalled: !!req.body.paywalled,
-        createdAt: new Date()
-      };
-
-      // Save chapter to comic (adapt if chapters are stored in separate collection)
+      // JavaScript
+      // get comicId up-front
       const comicId = req.body.comicId || req.body.comic || req.query.comicId;
       if (!comicId) {
-        // If comic id isn't available via form, you probably expect it in the route or form -> adapt accordingly
         req.flash('error', 'No comic id supplied.');
-        return res.redirect(`/manage-uploads/comic/${comic._id}`);
+        return res.redirect('back');
       }
 
+      // fetch comic early so we can validate before creating chapter
       const comic = await models.Comic.findById(comicId);
       if (!comic) {
         req.flash('error', 'Comic not found.');
         return res.redirect('/manage-uploads');
       }
 
+      // Build chapter data and include the comic ref
+      const chapterData = {
+        title: String(title).trim(),
+        chapterNumber: Number(chapterNumber),
+        description: description ? String(description).trim() : '',
+        releaseDate: new Date(releaseDate),
+        pages: uploadedPageUrls.map(u => String(u)), // ensure strings
+        nsfw: !!req.body.nsfw,
+        paywalled: !!req.body.paywalled,
+        createdAt: new Date(),
+        author: req.user?._id,
+        comic: comic._id // required field
+      };
+
+      // create chapter document
+      const chapterDoc = await models.Chapter.create(chapterData);
+
+      // reference the chapter from the comic (assumes Comic.chapters is ObjectId[] refs)
       comic.chapters = comic.chapters || [];
-      comic.chapters.push(chapter);
+      comic.chapters.push(chapterDoc._id);
       await comic.save();
 
-      // JavaScript
-      // after saving the comic/chapter
       req.flash('success', 'Chapter created successfully.');
       return res.redirect(`/manage-uploads/comic/${comic._id}`);
     } catch (err) {
