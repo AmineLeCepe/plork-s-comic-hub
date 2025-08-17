@@ -703,6 +703,32 @@ app.use((err, req, res, next) => {
   // Not a multer error, pass along
   return next(err);
 });
+// JavaScript
+// Place this before the 404 handler
+app.get('/chapter', async (req, res) => {
+  try {
+    const chapterId = req.query.chapterid;
+    if (!chapterId) {
+      req.flash?.('error', 'Missing chapter id.');
+      return res.redirect('/');
+    }
+
+    // Load the chapter and its comic (for title/context)
+    const chapter = await models.Chapter.findById(chapterId).populate('comic', 'title _id');
+    if (!chapter) {
+      return res.status(404).render('404');
+    }
+
+    // Render the reader page
+    return res.render('read-comic', {
+      chapter,
+      comic: chapter.comic || null
+    });
+  } catch (err) {
+    console.error('[GET /chapter] error:', err);
+    return res.status(500).send('Failed to load chapter.');
+  }
+});
 /// 404 error handler
 
 app.use((req, res) => {

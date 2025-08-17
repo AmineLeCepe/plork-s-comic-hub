@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title><%= (chapter && chapter.title) ? chapter.title : (comic ? comic.title : 'Read') %></title>
+    <%- include("partials/head") %>
+    <link rel="stylesheet" href="/css/read-comic.css">
+</head>
+<body>
+<%- include("partials/navbar") %>
+<div class="main-content">
+    <%- include("partials/navbar2") %>
+
+    <div class="reader-container">
+        <header class="reader-header">
+            <h1 class="reader-title">
+                <%= comic ? comic.title : '' %><%= chapter && chapter.chapterNumber != null ? ` — Chapter ${chapter.chapterNumber}` : '' %>
+            </h1>
+            <% if (chapter && chapter.title) { %>
+                <p class="reader-subtitle"><%= chapter.title %></p>
+            <% } %>
+        </header>
+
+        <div class="page-list">
+            <% if (chapter && Array.isArray(chapter.pages) && chapter.pages.length > 0) { %>
+                <% chapter.pages.forEach(function(pageUrl, idx) { %>
+                    <div class="page-row">
+                        <img src="<%= pageUrl %>" alt="Page <%= idx + 1 %>" loading="lazy">
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <p class="no-pages">No pages available for this chapter.</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<%- include("partials/scripts") %>
+</body>
+</html>

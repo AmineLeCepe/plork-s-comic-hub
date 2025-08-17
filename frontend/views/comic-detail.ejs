@@ -57,7 +57,7 @@
                         <div class="chapter-row">
                             <div class="chapter-thumb">
                                 <% if (chapter.pages && chapter.pages.length > 0) { %>
-                                    <a href="/manage-uploads/comic/<%= comic._id %>/chapter/<%= chapter._id %>">
+                                    <a href="/chapter?chapterid=<%= chapter._id %>">
                                         <img src="<%= chapter.pages[0] %>" alt="Page 1 of <%= chapter.title %>">
                                     </a>
                                 <% } else { %>
@@ -68,7 +68,7 @@
                             </div>
 
                             <div class="chapter-info">
-                                <a class="chapter-link" href="/manage-uploads/comic/<%= comic._id %>/chapter/<%= chapter._id %>">
+                                <a class="chapter-link" href="/chapter?chapterid=<%= chapter._id %>">
                                     <h3><%= chapter.title %></h3>
                                     <p>Chapter <%= chapter.chapterNumber %></p>
                                 </a>
