@@ -84,6 +84,7 @@
     closeBtn.addEventListener("click", () => {
         modal.classList.remove("open");
         hardReset();
+        form.reset();
     });
 
     window.addEventListener('beforeunload', () => {
@@ -263,7 +264,6 @@
         revokeAllURLs();
         items = [];
         previewContainer.innerHTML = '';
-        form.reset();
     }
 </script>
 
