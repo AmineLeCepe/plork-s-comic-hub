@@ -75,85 +75,82 @@
                 <!-- Column 1 -->
                 <div class="latest-column">
                     <% 
-                    // Create sample data for the first column
-                    for(let i = 0; i < 4; i++) { 
-                        let chapter = {
-                            title: `Chapter ${i+1}`,
-                            number: i+1,
-                            cover: "/assets/chapter-placeholder.png",
-                            date: Date.now() - (i * 86400000) // One day earlier for each item
-                        };
-                        let comic = {
-                            name: `Sample Comic ${i+1}`
-                        };
+                    // Render every 3rd item starting from index 0 to form column 1
+                    if (typeof latestChapters !== 'undefined') {
+                        for (let i = 0; i < latestChapters.length; i += 3) {
+                            const ch = latestChapters[i];
+                            if (!ch) continue;
                     %>
                         <div class="latest-chapter-item">
-                            <div class="chapter-header">
-                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
-                                <div class="chapter-info-small">
-                                    <h4 class="comic-name-small"><%= comic.name %></h4>
-                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
-                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                            <a href="/chapter?chapterid=<%= ch._id %>" class="chapter-link">
+                                <div class="chapter-header">
+                                    <img src="<%= ch.comic?.cover || '/assets/chapter-placeholder.png' %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                    <div class="chapter-info-small">
+                                        <h4 class="comic-name-small"><%= ch.comic?.title || 'Untitled Comic' %></h4>
+                                        <h5 class="chapter-title-small"><%= ch.chapterNumber %>. <%= ch.title %></h5>
+                                        <span class="chapter-date-small">Released: <%= new Date(ch.releaseDate).toLocaleDateString() %></span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                    <% } %>
+                    <% 
+                        } 
+                    } 
+                    %>
                 </div>
                 
                 <!-- Column 2 -->
                 <div class="latest-column">
                     <% 
-                    // Create sample data for the second column
-                    for(let i = 4; i < 8; i++) { 
-                        let chapter = {
-                            title: `Chapter ${i+1}`,
-                            number: i+1,
-                            cover: "/assets/chapter-placeholder.png",
-                            date: Date.now() - (i * 86400000)
-                        };
-                        let comic = {
-                            name: `Sample Comic ${i+1}`
-                        };
+                    // Render every 3rd item starting from index 1 to form column 2
+                    if (typeof latestChapters !== 'undefined') {
+                        for (let i = 1; i < latestChapters.length; i += 3) {
+                            const ch = latestChapters[i];
+                            if (!ch) continue;
                     %>
                         <div class="latest-chapter-item">
-                            <div class="chapter-header">
-                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
-                                <div class="chapter-info-small">
-                                    <h4 class="comic-name-small"><%= comic.name %></h4>
-                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
-                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                            <a href="/chapter?chapterid=<%= ch._id %>" class="chapter-link">
+                                <div class="chapter-header">
+                                    <img src="<%= ch.comic?.cover || '/assets/chapter-placeholder.png' %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                    <div class="chapter-info-small">
+                                        <h4 class="comic-name-small"><%= ch.comic?.title || 'Untitled Comic' %></h4>
+                                        <h5 class="chapter-title-small"><%= ch.chapterNumber %>. <%= ch.title %></h5>
+                                        <span class="chapter-date-small">Released: <%= new Date(ch.releaseDate).toLocaleDateString() %></span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                    <% } %>
+                    <% 
+                        } 
+                    } 
+                    %>
                 </div>
                 
                 <!-- Column 3 -->
                 <div class="latest-column">
                     <% 
-                    // Create sample data for the third column
-                    for(let i = 8; i < 12; i++) { 
-                        let chapter = {
-                            title: `Chapter ${i+1}`,
-                            number: i+1,
-                            cover: "/assets/chapter-placeholder.png",
-                            date: Date.now() - (i * 86400000)
-                        };
-                        let comic = {
-                            name: `Sample Comic ${i+1}`
-                        };
+                    // Render every 3rd item starting from index 2 to form column 3
+                    if (typeof latestChapters !== 'undefined') {
+                        for (let i = 2; i < latestChapters.length; i += 3) {
+                            const ch = latestChapters[i];
+                            if (!ch) continue;
                     %>
                         <div class="latest-chapter-item">
-                            <div class="chapter-header">
-                                <img src="<%= chapter.cover %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
-                                <div class="chapter-info-small">
-                                    <h4 class="comic-name-small"><%= comic.name %></h4>
-                                    <h5 class="chapter-title-small"><%= chapter.number %>. <%= chapter.title %></h5>
-                                    <span class="chapter-date-small">Released: <%= new Date(chapter.date).toLocaleDateString() %></span>
+                            <a href="/chapter?chapterid=<%= ch._id %>" class="chapter-link">
+                                <div class="chapter-header">
+                                    <img src="<%= ch.comic?.cover || '/assets/chapter-placeholder.png' %>" alt="Chapter Thumbnail" class="chapter-thumbnail-small"/>
+                                    <div class="chapter-info-small">
+                                        <h4 class="comic-name-small"><%= ch.comic?.title || 'Untitled Comic' %></h4>
+                                        <h5 class="chapter-title-small"><%= ch.chapterNumber %>. <%= ch.title %></h5>
+                                        <span class="chapter-date-small">Released: <%= new Date(ch.releaseDate).toLocaleDateString() %></span>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
-                    <% } %>
+                    <% 
+                        } 
+                    } 
+                    %>
                 </div>
             </div>
         </div>

@@ -23,4 +23,21 @@ async function chapterGet(req, res) {
     }
 }
 
-module.exports = { chapterGet };
+async function latestReleasesGet(req, res) {
+    try {
+        // Pull latest chapters, newest first. Adjust limit as needed.
+        const latestChapters = await models.Chapter.find({})
+            .sort({ releaseDate: -1 })
+            .limit(36)
+            .populate('comic', 'title cover _id');
+
+        return res.render('index', {
+            latestChapters
+        });
+    } catch (err) {
+        console.error('[GET /] latest releases error:', err);
+        return res.status(500).send('Failed to load latest releases.');
+    }
+}
+
+module.exports = { chapterGet, latestReleasesGet };
