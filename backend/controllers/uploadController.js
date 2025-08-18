@@ -1,5 +1,8 @@
 const models = require('../models');
 // Use the specific module to avoid directory import issues
+const mongoose = require('mongoose');
+const Chapter = require('../models/Chapter');
+const Comic = require('../models/Comic');
 const comicQueries = require('../queries/comicQueries');
 const { uploadBufferToCloudinary } = require('../services/cloudinaryService');
 const { optimizeCover, optimizePage } = require('../services/imageService');
@@ -171,8 +174,10 @@ async function manageUploadsGet(req, res) {
   }
 }
 
-async function comicDetailGet(req, res) {
+async function comicDetailGet(req, res, next) {
   try {
+    const comicId = req.params?.id || req.query?.id;
+
     const comic = await models.Comic.findById(req.params.id)
       .populate('author', 'username')
       .populate({
@@ -180,13 +185,32 @@ async function comicDetailGet(req, res) {
         options: { sort: { chapterNumber: 1 } },
       });
 
+    // Example: const comic = await Comic.findById(comicId).populate('chapters');
+
+    // Recompute and sync total views from chapters before rendering/returning
+    if (comicId) {
+      const agg = await Chapter.aggregate([
+        { $match: { comic: new mongoose.Types.ObjectId(comicId) } },
+        { $group: { _id: '$comic', totalViews: { $sum: '$stats.views' } } },
+      ]);
+      const totalViews = agg?.[0]?.totalViews ?? 0;
+
+      await Comic.updateOne(
+        { _id: comicId },
+        { $set: { 'stats.views': totalViews } }
+      );
+
+      if (typeof comic?.stats === 'object') {
+        comic.stats.views = totalViews;
+      }
+    }
+
     if (comic) {
       return res.render('comic-detail', { comic });
     }
     return res.status(404).render('404');
-  } catch (error) {
-    console.error('Error fetching comic details:', error);
-    return res.status(500).send('Error loading comic page.');
+  } catch (err) {
+    return next(err);
   }
 }
 

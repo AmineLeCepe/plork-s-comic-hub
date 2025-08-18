@@ -1,43 +1,70 @@
-const models = require('../models');
+const Chapter = require('../models/Chapter');
+const Comic = require('../models/Comic');
 
-async function chapterGet(req, res) {
-    try {
-        const chapterId = req.query.chapterid;
-        if (!chapterId) {
-            req.flash?.('error', 'Missing chapter id.');
-            return res.redirect('/');
-        }
+// Fetch latest chapters for homepage
+async function latestReleasesGet(req, res, next) {
+  try {
+    const latestChapters = await Chapter.find({})
+      .sort({ releaseDate: -1 })
+      .limit(30)
+      .populate('comic')
+      .lean();
 
-        const chapter = await models.Chapter.findById(chapterId).populate('comic', 'title _id');
-        if (!chapter) {
-            return res.status(404).render('404');
-        }
-
-        return res.render('read-comic', {
-            chapter,
-            comic: chapter.comic || null,
-        });
-    } catch (err) {
-        console.error('[GET /chapter] error:', err);
-        return res.status(500).send('Failed to load chapter.');
-    }
+    return res.render('index', { latestChapters });
+  } catch (err) {
+    return next(err);
+  }
 }
 
-async function latestReleasesGet(req, res) {
-    try {
-        // Pull latest chapters, newest first. Adjust limit as needed.
-        const latestChapters = await models.Chapter.find({})
-            .sort({ releaseDate: -1 })
-            .limit(36)
-            .populate('comic', 'title cover _id');
+// Existing chapter view counter logic
+async function chapterGet(req, res, next) {
+  try {
+    const chapterId = req.params?.id || req.query?.id || req.query?.chapterid;
 
-        return res.render('index', {
-            latestChapters
-        });
-    } catch (err) {
-        console.error('[GET /] latest releases error:', err);
-        return res.status(500).send('Failed to load latest releases.');
+    if (!chapterId) {
+      return res.status(400).send('Missing chapter id');
     }
+
+    // Increment chapter views
+    const updatedChapter = await Chapter.findByIdAndUpdate(
+      chapterId,
+      { $inc: { 'stats.views': 1 } },
+      { new: true }
+    );
+
+    if (!updatedChapter) {
+      return res.status(404).send('Chapter not found');
+    }
+
+    // Recompute comic total views from all its chapters
+    if (updatedChapter.comic) {
+      const agg = await Chapter.aggregate([
+        { $match: { comic: updatedChapter.comic } },
+        { $group: { _id: '$comic', totalViews: { $sum: '$stats.views' } } },
+      ]);
+      const totalViews = agg?.[0]?.totalViews ?? 0;
+
+      await Comic.updateOne(
+        { _id: updatedChapter.comic },
+        { $set: { 'stats.views': totalViews } }
+      );
+    }
+
+    // Fetch the full chapter (with comic populated) for rendering
+    const chapter = await Chapter.findById(chapterId).populate('comic').lean();
+    if (!chapter) {
+      return res.status(404).send('Chapter not found');
+    }
+
+    // Render existing reader view with required data
+    return res.render('read-comic', { comic: chapter.comic, chapter });
+
+  } catch (err) {
+    return next(err);
+  }
 }
 
-module.exports = { chapterGet, latestReleasesGet };
+module.exports = {
+  latestReleasesGet,
+  chapterGet,
+};
