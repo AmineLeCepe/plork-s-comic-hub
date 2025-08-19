@@ -31,6 +31,50 @@
                 <p class="no-pages">No pages available for this chapter.</p>
             <% } %>
         </div>
+
+        <!-- Comments Section -->
+        <section class="comments-section">
+            <h2 class="comments-title">Comments</h2>
+
+            <div class="comments-list">
+                <% if (Array.isArray(comments) && comments.length > 0) { %>
+                    <% comments.forEach(function(cmt) { %>
+                        <div class="comment-item">
+                            <div class="comment-header">
+                                <div class="comment-author">
+                                    <% if (cmt.user && cmt.user.avatar) { %>
+                                        <img class="comment-avatar" src="<%= cmt.user.avatar %>" alt="<%= cmt.user.username || 'User' %>">
+                                    <% } %>
+                                    <span class="comment-username"><%= cmt.user && cmt.user.username ? cmt.user.username : 'User' %></span>
+                                </div>
+                                <time class="comment-time" datetime="<%= cmt.createdAt.toISOString ? cmt.createdAt.toISOString() : cmt.createdAt %>">
+                                    <%= new Date(cmt.createdAt).toLocaleString() %>
+                                </time>
+                            </div>
+                            <p class="comment-text"><%= cmt.text %></p>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <p class="no-comments">No comments yet. Be the first comment!</p>
+                <% } %>
+            </div>
+
+            <div class="comment-form-wrap">
+                <% if (typeof user !== 'undefined' && user) { %>
+                    <form class="comment-form" method="post" action="/comments">
+                        <input type="hidden" name="chapterId" value="<%= chapter ? chapter._id : '' %>">
+                        <input type="hidden" name="comicId" value="<%= comic ? comic._id : '' %>">
+                        <textarea name="text" rows="3" placeholder="Write a comment..." maxlength="1000" required></textarea>
+                        <button type="submit" class="comment-submit-btn">Post Comment</button>
+                    </form>
+                <% } else { %>
+                    <div class="comment-login-hint">
+                        <p>Please sign in to post a comment.</p>
+                    </div>
+                <% } %>
+            </div>
+        </section>
+        <!-- End Comments Section -->
     </div>
 </div>
 
