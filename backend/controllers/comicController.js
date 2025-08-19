@@ -278,6 +278,55 @@ async function deleteChapterPost(req, res, next) {
   }
 }
 
+async function addChapterCommentPost(req, res, next) {
+    try {
+        if (!req.user) {
+            req.flash('error', 'Please sign in to comment.');
+            return res.redirect('back');
+        }
+
+        const text = String(req.body?.text || '').trim();
+        const chapterId = String(req.body?.chapterId || '').trim();
+        const comicId = String(req.body?.comicId || '').trim() || null;
+
+        if (!chapterId) {
+            req.flash('error', 'Missing chapter ID.');
+            return res.redirect('back');
+        }
+        if (!text) {
+            req.flash('error', 'Comment cannot be empty.');
+            return res.redirect('back');
+        }
+
+        // Ensure chapter exists
+        const chapter = await Chapter.findById(chapterId).select('_id comic');
+        if (!chapter) {
+            req.flash('error', 'Chapter not found.');
+            return res.redirect('back');
+        }
+
+        // Create comment
+        await Comment.create({
+            user: req.user._id,
+            chapter: chapterId,
+            comic: comicId || chapter.comic || undefined,
+            text
+        });
+
+        // Increment stats
+        await Chapter.updateOne({ _id: chapterId }, { $inc: { 'stats.comments': 1 } });
+        if (comicId || chapter.comic) {
+            await Comic.updateOne({ _id: comicId || chapter.comic }, { $inc: { 'stats.comments': 1 } }).catch(() => {});
+        }
+
+        req.flash('success', 'Comment posted.');
+        return res.redirect(req.get('Referer') || `/chapter?chapterid=${chapterId}`);
+    } catch (err) {
+        return next(err);
+    }
+}
+
+
 module.exports = {
   latestReleasesGet,
   chapterGet,
