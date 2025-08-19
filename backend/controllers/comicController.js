@@ -1,5 +1,8 @@
 const Chapter = require('../models/Chapter');
 const Comic = require('../models/Comic');
+// ... existing code ...
+// Import Cloudinary cleanup helper from your cloudinary module
+const { deleteCloudinaryResourcesByUrls } = require('../config/cloudinary');
 
 // Fetch latest chapters for homepage
 async function latestReleasesGet(req, res, next) {
@@ -64,7 +67,9 @@ async function chapterGet(req, res, next) {
   }
 }
 
-// Securely update the title of a chapter
+// ... existing code ...
+
+// Define: update chapter title (required by routes and export)
 async function updateChapterTitlePost(req, res, next) {
   try {
     const chapterId = req.params.id;
@@ -80,7 +85,7 @@ async function updateChapterTitlePost(req, res, next) {
       return res.redirect('back');
     }
 
-    // Authorization: only the comic author can edit
+    // Only the comic author can edit
     if (req.user && chapter.comic?.author?.toString && chapter.comic.author.toString() !== req.user._id.toString()) {
       req.flash('error', 'You are not allowed to edit this chapter.');
       return res.redirect('back');
@@ -97,7 +102,7 @@ async function updateChapterTitlePost(req, res, next) {
   }
 }
 
-// Securely delete a chapter and remove its reference from the comic
+// Define: delete chapter + Cloudinary cleanup (required by routes and export)
 async function deleteChapterPost(req, res, next) {
   try {
     const chapterId = req.params.id;
@@ -108,13 +113,14 @@ async function deleteChapterPost(req, res, next) {
       return res.redirect('back');
     }
 
-    // Authorization: only the comic author can delete
+    // Only the comic author can delete
     if (req.user && chapter.comic?.author?.toString && chapter.comic.author.toString() !== req.user._id.toString()) {
       req.flash('error', 'You are not allowed to delete this chapter.');
       return res.redirect('back');
     }
 
     const comicId = chapter.comic?._id;
+    const pageUrls = Array.isArray(chapter.pages) ? chapter.pages.slice() : [];
 
     await Chapter.deleteOne({ _id: chapterId });
 
@@ -135,6 +141,19 @@ async function deleteChapterPost(req, res, next) {
       );
     }
 
+    // Best-effort Cloudinary cleanup
+    if (pageUrls.length) {
+      try {
+        const result = await deleteCloudinaryResourcesByUrls(pageUrls);
+        if (result.failed && result.failed.length) {
+          req.flash('info', `Chapter deleted, but some images could not be removed from Cloudinary (${result.failed.length}).`);
+        }
+      } catch (err) {
+        console.error('[deleteChapterPost] cloudinary cleanup error:', err);
+        req.flash('info', 'Chapter deleted, but images might not have been removed from Cloudinary.');
+      }
+    }
+
     req.flash('success', 'Chapter deleted.');
     const fallback = comicId ? `/manage-uploads/comic/${comicId}` : '/';
     return res.redirect(req.get('Referer') || fallback);
@@ -146,6 +165,7 @@ async function deleteChapterPost(req, res, next) {
 module.exports = {
   latestReleasesGet,
   chapterGet,
+  // ... existing code ...
   updateChapterTitlePost,
   deleteChapterPost,
 };
