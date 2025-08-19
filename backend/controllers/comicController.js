@@ -64,7 +64,88 @@ async function chapterGet(req, res, next) {
   }
 }
 
+// Securely update the title of a chapter
+async function updateChapterTitlePost(req, res, next) {
+  try {
+    const chapterId = req.params.id;
+    const newTitle = String(req.body?.title || '').trim();
+    if (!newTitle) {
+      req.flash('error', 'Title cannot be empty.');
+      return res.redirect('back');
+    }
+
+    const chapter = await Chapter.findById(chapterId).populate('comic', 'author');
+    if (!chapter) {
+      req.flash('error', 'Chapter not found.');
+      return res.redirect('back');
+    }
+
+    // Authorization: only the comic author can edit
+    if (req.user && chapter.comic?.author?.toString && chapter.comic.author.toString() !== req.user._id.toString()) {
+      req.flash('error', 'You are not allowed to edit this chapter.');
+      return res.redirect('back');
+    }
+
+    chapter.title = newTitle;
+    await chapter.save();
+
+    req.flash('success', 'Chapter title updated.');
+    const fallback = chapter.comic ? `/manage-uploads/comic/${chapter.comic._id}` : '/';
+    return res.redirect(req.get('Referer') || fallback);
+  } catch (err) {
+    return next(err);
+  }
+}
+
+// Securely delete a chapter and remove its reference from the comic
+async function deleteChapterPost(req, res, next) {
+  try {
+    const chapterId = req.params.id;
+
+    const chapter = await Chapter.findById(chapterId).populate('comic', '_id author');
+    if (!chapter) {
+      req.flash('error', 'Chapter not found.');
+      return res.redirect('back');
+    }
+
+    // Authorization: only the comic author can delete
+    if (req.user && chapter.comic?.author?.toString && chapter.comic.author.toString() !== req.user._id.toString()) {
+      req.flash('error', 'You are not allowed to delete this chapter.');
+      return res.redirect('back');
+    }
+
+    const comicId = chapter.comic?._id;
+
+    await Chapter.deleteOne({ _id: chapterId });
+
+    if (comicId) {
+      await Comic.updateOne(
+        { _id: comicId },
+        { $pull: { chapters: chapterId } }
+      );
+      // Recompute comic total views after deletion
+      const agg = await Chapter.aggregate([
+        { $match: { comic: comicId } },
+        { $group: { _id: '$comic', totalViews: { $sum: '$stats.views' } } },
+      ]);
+      const totalViews = agg?.[0]?.totalViews ?? 0;
+      await Comic.updateOne(
+        { _id: comicId },
+        { $set: { 'stats.views': totalViews } }
+      );
+    }
+
+    req.flash('success', 'Chapter deleted.');
+    const fallback = comicId ? `/manage-uploads/comic/${comicId}` : '/';
+    return res.redirect(req.get('Referer') || fallback);
+  } catch (err) {
+    return next(err);
+  }
+}
+
 module.exports = {
   latestReleasesGet,
   chapterGet,
+  updateChapterTitlePost,
+  deleteChapterPost,
 };

@@ -393,6 +393,7 @@ textarea {
     border: 1px solid #f0f0f0;
     box-shadow: 0 1px 2px rgba(0,0,0,0.03);
     transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s;
+    position: relative; /* for absolute children */
 }
 
 /* hover/focus state for a subtle lift */
@@ -472,6 +473,82 @@ textarea {
     margin-top: 8px;
     color: #888;
     font-size: 0.85rem;
+}
+
+/* Actions (top-right) */
+.chapter-actions {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 6px;
+}
+.action-btn {
+    border: 1px solid #e0e0e0;
+    background: #fff;
+    color: #333;
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.action-btn:hover { background: #f5f5f5; }
+.action-btn.danger { color: #b00020; border-color: #f0c9cf; }
+.inline-form { display: inline; }
+
+/* Inline edit form */
+.inline-edit-form {
+    margin-top: 8px;
+    display: none;
+    gap: 8px;
+}
+.inline-edit-form.open { display: flex; }
+.inline-edit-form input[type="text"] {
+    max-width: 360px;
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+.inline-edit-form .save-btn {
+    background: #444;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+.inline-edit-form .light {
+    background: #f1f1f1;
+    border: 1px solid #ddd;
+    color: #555;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+/* bottom-right stats */
+.chapter-stats {
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    color: #666;
+    font-size: 0.9rem;
+}
+.chapter-stats .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+.chapter-stats .stat svg {
+    width: 18px;
+    height: 18px;
+    fill: #888;
 }
 
 /* Make rows stack nicely on small screens */

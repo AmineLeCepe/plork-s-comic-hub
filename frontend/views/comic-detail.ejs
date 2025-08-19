@@ -55,6 +55,14 @@
                 <div class="chapters-list">
                     <% comic.chapters.forEach(function(chapter) { %>
                         <div class="chapter-row">
+                            <!-- top-right actions -->
+                            <div class="chapter-actions">
+                                <button class="action-btn js-toggle-edit" type="button" aria-label="Edit chapter title" data-target="edit-<%= chapter._id %>">✎</button>
+                                <form action="/chapter/<%= chapter._id %>/delete" method="post" onsubmit="return confirm('Delete this chapter? This cannot be undone.');" class="inline-form">
+                                    <button class="action-btn danger" type="submit" aria-label="Delete chapter">🗑</button>
+                                </form>
+                            </div>
+
                             <div class="chapter-thumb">
                                 <% if (chapter.pages && chapter.pages.length > 0) { %>
                                     <a href="/chapter?chapterid=<%= chapter._id %>">
@@ -75,6 +83,32 @@
                                 <% if (chapter.releaseDate) { %>
                                     <p class="chapter-meta">Released: <%= new Date(chapter.releaseDate).toLocaleDateString() %></p>
                                 <% } %>
+
+                                <!-- inline edit form (hidden by default) -->
+                                <form id="edit-<%= chapter._id %>" class="inline-edit-form" action="/chapter/<%= chapter._id %>/title" method="post">
+                                    <input type="text" name="title" value="<%= chapter.title %>" required>
+                                    <button type="submit" class="save-btn">Save</button>
+                                    <button type="button" class="cancel-btn light js-cancel-edit" data-target="edit-<%= chapter._id %>">Cancel</button>
+                                </form>
+                            </div>
+
+                            <!-- bottom-right stats -->
+                            <div class="chapter-stats">
+                                <div class="stat">
+                                    <!-- eye icon -->
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5c-7 0-10 7-10 7s3 7 10 7 10-7 10-7-3-7-10-7zm0 12a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/></svg>
+                                    <span><%= (chapter.stats && chapter.stats.views) || 0 %></span>
+                                </div>
+                                <div class="stat">
+                                    <!-- bookmark icon -->
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2h12a1 1 0 0 1 1 1v19l-7-4-7 4V3a1 1 0 0 1 1-1z"/></svg>
+                                    <span><%= (chapter.stats && chapter.stats.bookmarks) || 0 %></span>
+                                </div>
+                                <div class="stat">
+                                    <!-- heart icon -->
+                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7.5-4.35-10-9c-2-3.8 1-8 5-8 2.1 0 3.7 1.2 5 3 1.3-1.8 2.9-3 5-3 4 0 7 4.2 5 8-2.5 4.65-10 9-10 9z"/></svg>
+                                    <span><%= (chapter.stats && chapter.stats.likes) || 0 %></span>
+                                </div>
                             </div>
                         </div>
                     <% }) %>
@@ -293,6 +327,22 @@
         items = [];
         previewContainer.innerHTML = '';
     }
+
+    // Inline edit show/hide handlers
+    document.addEventListener('click', (e) => {
+        const toggleBtn = e.target.closest('.js-toggle-edit');
+        if (toggleBtn) {
+            const id = toggleBtn.dataset.target;
+            const form = document.getElementById(id);
+            if (form) form.classList.toggle('open');
+        }
+        const cancelBtn = e.target.closest('.js-cancel-edit');
+        if (cancelBtn) {
+            const id = cancelBtn.dataset.target;
+            const form = document.getElementById(id);
+            if (form) form.classList.remove('open');
+        }
+    });
 </script>
 
 <%- include("partials/scripts") %>
