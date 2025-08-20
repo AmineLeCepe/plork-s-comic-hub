@@ -38,11 +38,15 @@
 
             <div class="comment-form-wrap">
                 <% if (typeof user !== 'undefined' && user) { %>
-                    <form class="comment-form" method="post" action="/comments">
+                    <% const remainingMs = typeof commentCooldownRemainingMs !== 'undefined' ? commentCooldownRemainingMs : 0; %>
+                    <form class="comment-form" method="post" action="/comments" data-remaining-ms="<%= remainingMs %>">
                         <input type="hidden" name="chapterId" value="<%= chapter ? chapter._id : '' %>">
                         <input type="hidden" name="comicId" value="<%= comic ? comic._id : '' %>">
-                        <textarea name="text" rows="3" placeholder="Write a comment..." maxlength="1000" required></textarea>
-                        <button type="submit" class="comment-submit-btn">Post Comment</button>
+                        <textarea name="text" rows="3" placeholder="Write a comment..." maxlength="1000" required <%= remainingMs > 0 ? 'disabled' : '' %>></textarea>
+                        <div class="comment-controls">
+                            <button type="submit" class="comment-submit-btn" <%= remainingMs > 0 ? 'disabled' : '' %>>Post Comment</button>
+                            <span id="comment-cooldown-hint" class="cooldown-hint" <%= remainingMs > 0 ? '' : 'style="visibility:hidden;"' %>></span>
+                        </div>
                     </form>
                 <% } else { %>
                     <div class="comment-login-hint">
@@ -75,6 +79,55 @@
             </div>
         </section>
         <!-- End Comments Section -->
+
+        <script type="text/javascript">
+          (function () {
+            var form = document.querySelector('.comment-form');
+            if (!form) return;
+            var remaining = parseInt(form.getAttribute('data-remaining-ms') || '0', 10);
+            var hint = document.getElementById('comment-cooldown-hint');
+            var btn = form.querySelector('.comment-submit-btn');
+            var textarea = form.querySelector('textarea');
+
+            function format(ms) {
+              var totalSec = Math.max(0, Math.floor(ms / 1000));
+              var m = Math.floor(totalSec / 60);
+              var s = totalSec % 60;
+              return m + 'm ' + (s < 10 ? '0' : '') + s + 's';
+            }
+
+            function lockUI() {
+              if (btn) btn.disabled = true;
+              if (textarea) textarea.disabled = true;
+              if (hint) {
+                hint.style.visibility = 'visible';
+                hint.textContent = 'You can comment in ' + format(remaining) + '.';
+              }
+            }
+
+            function unlockUI() {
+              if (btn) btn.disabled = false;
+              if (textarea) textarea.disabled = false;
+              if (hint) {
+                hint.textContent = '';
+                hint.style.visibility = 'hidden';
+              }
+            }
+
+            if (remaining > 0) {
+              lockUI();
+              var interval = setInterval(function () {
+                remaining -= 1000;
+                if (remaining <= 0) {
+                  clearInterval(interval);
+                  unlockUI();
+                  return;
+                }
+                if (hint) hint.textContent = 'You can comment in ' + format(remaining) + '.';
+              }, 1000);
+            }
+          })();
+        </script>
     </div>
 </div>
 

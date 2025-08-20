@@ -22,57 +22,81 @@ async function latestReleasesGet(req, res, next) {
 
 // Existing chapter view counter logic
 async function chapterGet(req, res, next) {
-  try {
-    const chapterId = req.params?.id || req.query?.id || req.query?.chapterid;
+    try {
+        const chapterId = req.params?.id || req.query?.id || req.query?.chapterid;
 
-    if (!chapterId) {
-      return res.status(400).send('Missing chapter id');
+        if (!chapterId) {
+            return res.status(400).send('Missing chapter id');
+        }
+
+        // Increment chapter views
+        const updatedChapter = await Chapter.findByIdAndUpdate(
+            chapterId,
+            { $inc: { 'stats.views': 1 } },
+            { new: true }
+        );
+
+        if (!updatedChapter) {
+            return res.status(404).send('Chapter not found');
+        }
+
+        // Recompute comic total views from all its chapters
+        if (updatedChapter.comic) {
+            const agg = await Chapter.aggregate([
+                { $match: { comic: updatedChapter.comic } },
+                { $group: { _id: '$comic', totalViews: { $sum: '$stats.views' } } },
+            ]);
+            const totalViews = agg?.[0]?.totalViews ?? 0;
+
+            await Comic.updateOne(
+                { _id: updatedChapter.comic },
+                { $set: { 'stats.views': totalViews } }
+            );
+        }
+
+        // Fetch the full chapter (with comic populated) for rendering
+        const chapter = await Chapter.findById(chapterId).populate('comic').lean();
+        if (!chapter) {
+            return res.status(404).send('Chapter not found');
+        }
+
+        // Fetch comments for this chapter
+        const comments = await Comment.find({ chapter: chapterId })
+            .populate('user', 'username avatar')
+            .sort({ createdAt: -1 })
+            .lean();
+
+        // Compute per-user remaining cooldown (global, across chapters)
+        let commentCooldownRemainingMs = 0;
+        try {
+            if (req.user) {
+                const COOLDOWN_MS = 60 * 60 * 1000;
+                const lastComment = await Comment.findOne({ user: req.user._id })
+                    .sort({ createdAt: -1 })
+                    .select('createdAt')
+                    .lean();
+                if (lastComment?.createdAt) {
+                    const elapsed = Date.now() - new Date(lastComment.createdAt).getTime();
+                    commentCooldownRemainingMs = Math.max(0, COOLDOWN_MS - elapsed);
+                }
+            }
+        } catch (_) {
+            // ignore cooldown calculation errors for rendering
+        }
+
+        // Render existing reader view with required data
+        return res.render('read-comic', {
+            comic: chapter.comic,
+            chapter,
+            comments,
+            commentCooldownRemainingMs
+        });
+
+    } catch (err) {
+        return next(err);
     }
-
-    // Increment chapter views
-    const updatedChapter = await Chapter.findByIdAndUpdate(
-      chapterId,
-      { $inc: { 'stats.views': 1 } },
-      { new: true }
-    );
-
-    if (!updatedChapter) {
-      return res.status(404).send('Chapter not found');
-    }
-
-    // Recompute comic total views from all its chapters
-    if (updatedChapter.comic) {
-      const agg = await Chapter.aggregate([
-        { $match: { comic: updatedChapter.comic } },
-        { $group: { _id: '$comic', totalViews: { $sum: '$stats.views' } } },
-      ]);
-      const totalViews = agg?.[0]?.totalViews ?? 0;
-
-      await Comic.updateOne(
-        { _id: updatedChapter.comic },
-        { $set: { 'stats.views': totalViews } }
-      );
-    }
-
-    // Fetch the full chapter (with comic populated) for rendering
-    const chapter = await Chapter.findById(chapterId).populate('comic').lean();
-    if (!chapter) {
-      return res.status(404).send('Chapter not found');
-    }
-
-    // Fetch comments for this chapter
-    const comments = await Comment.find({ chapter: chapterId })
-      .populate('user', 'username avatar')
-      .sort({ createdAt: -1 })
-      .lean();
-
-    // Render existing reader view with required data
-    return res.render('read-comic', { comic: chapter.comic, chapter, comments });
-
-  } catch (err) {
-    return next(err);
-  }
 }
+
 
 // ... existing code ...
 
@@ -169,55 +193,6 @@ async function deleteChapterPost(req, res, next) {
   }
 }
 
-// Add: create a new comment under a chapter
-async function addChapterCommentPost(req, res, next) {
-  try {
-    if (!req.user) {
-      req.flash('error', 'Please sign in to comment.');
-      return res.redirect('back');
-    }
-
-    const text = String(req.body?.text || '').trim();
-    const chapterId = String(req.body?.chapterId || '').trim();
-    const comicId = String(req.body?.comicId || '').trim() || null;
-
-    if (!chapterId) {
-      req.flash('error', 'Missing chapter ID.');
-      return res.redirect('back');
-    }
-    if (!text) {
-      req.flash('error', 'Comment cannot be empty.');
-      return res.redirect('back');
-    }
-
-    // Ensure chapter exists
-    const chapter = await Chapter.findById(chapterId).select('_id comic');
-    if (!chapter) {
-      req.flash('error', 'Chapter not found.');
-      return res.redirect('back');
-    }
-
-    // Create comment
-    await Comment.create({
-      user: req.user._id,
-      chapter: chapterId,
-      comic: comicId || chapter.comic || undefined,
-      text
-    });
-
-    // Increment stats
-    await Chapter.updateOne({ _id: chapterId }, { $inc: { 'stats.comments': 1 } });
-    if (comicId || chapter.comic) {
-      await Comic.updateOne({ _id: comicId || chapter.comic }, { $inc: { 'stats.comments': 1 } }).catch(() => {});
-    }
-
-    req.flash('success', 'Comment posted.');
-    return res.redirect(req.get('Referer') || `/chapter?chapterid=${chapterId}`);
-  } catch (err) {
-    return next(err);
-  }
-}
-
 // Define: delete chapter + Cloudinary cleanup (required by routes and export)
 async function deleteChapterPost(req, res, next) {
   try {
@@ -303,6 +278,22 @@ async function addChapterCommentPost(req, res, next) {
         if (!chapter) {
             req.flash('error', 'Chapter not found.');
             return res.redirect('back');
+        }
+
+        // Enforce 1-hour cooldown since user's last comment (global)
+        const COOLDOWN_MS = 60 * 60 * 1000;
+        const lastComment = await Comment.findOne({ user: req.user._id })
+            .sort({ createdAt: -1 })
+            .select('createdAt')
+            .lean();
+        if (lastComment?.createdAt) {
+            const elapsed = Date.now() - new Date(lastComment.createdAt).getTime();
+            if (elapsed < COOLDOWN_MS) {
+                const remainingMs = COOLDOWN_MS - elapsed;
+                const remainingMinutes = Math.ceil(remainingMs / 60000);
+                req.flash('error', `Please wait ${remainingMinutes} more minute(s) before commenting again.`);
+                return res.redirect('back');
+            }
         }
 
         // Create comment

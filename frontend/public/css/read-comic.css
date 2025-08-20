@@ -168,6 +168,23 @@ body, .main-content {
     background: #0b1220;
 }
 
+.comment-submit-btn[disabled] {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.comment-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.cooldown-hint {
+    color: #666;
+    font-size: 0.9rem;
+}
+
 .comment-login-hint {
     padding: 10px;
     background: #fafafa;
