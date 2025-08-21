@@ -1,7 +1,12 @@
 <link rel="stylesheet" href="/css/navbar2.css">
+<%
+const navPfp = (typeof user !== 'undefined' && user && user.pfp)
+        ? user.pfp
+        : ((typeof currentUser !== 'undefined' && currentUser && currentUser.pfp) ? currentUser.pfp : 1);
+%>
 <div class="secondary-navbar">
     <input type="text" class="search-input" placeholder="Search..." />
-    <img src="/assets/default-avatar.png" alt="Profile" class="profile-icon" id="profileIcon"/>
+    <img src="/assets/avatars/default-<%= navPfp %>.png" alt="Profile" class="profile-icon" id="profileIcon"/>
 </div>
 
 <!-- Profile Modal -->

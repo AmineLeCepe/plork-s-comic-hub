@@ -6,7 +6,7 @@ const report = new mongoose.Schema({
     passwordHash: { type: String, required: true },
     birthDate: { type: Date, required: true },
 
-    pfp: { type: Number, enum: [1, 2, 3, 4], default: 1 }, // pick from static 4
+    pfp: { type: Number, enum: [1, 2, 3, 4, 5, 6, 7 ,8], default: 1 }, // pick from static 4
 
     roles: {
         isUser: { type: Boolean, default: true },

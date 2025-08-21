@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const path = require('path');
 const express = require('express');
@@ -17,7 +18,7 @@ const passwordRoutes = require('./routes/passwordRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const comicController = require('./controllers/comicController');
 const comicRoutes = require('./routes/comicRoutes');
-
+const userRoutes = require('./routes/userRoutes');
 
 // Views and static files
 app.set('view engine', 'ejs');
@@ -40,13 +41,13 @@ app.use(flash());
 configPassport(app);
 app.use(locals());
 
-
 // Routes
 app.use('/', viewRoutes);
 app.use('/', authRoutes);
 app.use('/', passwordRoutes);
 app.use('/', uploadRoutes);
 app.use('/', comicRoutes);
+app.use('/profile', userRoutes);
 
 // Errors
 app.use(multerErrorHandler);

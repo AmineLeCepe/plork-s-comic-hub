@@ -12,12 +12,28 @@
         <div class="profile-content">
             <div class="profile-left">
                 <div class="profile-image-container">
-                    <img src="/assets/default-avatar.png" alt="Profile Picture" class="profile-image">
+                    <img src="/assets/avatars/default-<%= user.pfp || 1 %>.png" alt="Profile Picture" class="profile-image">
                 </div>
                 <div class="profile-username">
                     <h2><%= user.username %></h2>
                 </div>
-                <button class="report-button">Report User</button>
+                <button id="changePictureBtn" class="change-picture-button" type="button">Change picture</button>
+
+                <form id="avatarPicker" class="avatar-picker" method="POST" action="/profile/picture">
+                    <input type="hidden" name="pfp" id="pfpInput" value="<%= user.pfp || 1 %>">
+                    <div class="avatar-grid">
+                        <% for (let i = 1; i <= 8; i++) { %>
+                            <label class="avatar-option <%= (user.pfp === i) ? 'selected' : '' %>">
+                                <input type="radio" name="pfpChoice" value="<%= i %>" style="display:none" <%= (user.pfp === i) ? 'checked' : '' %> />
+                                <img src="/assets/avatars/default-<%= i %>.png" alt="Avatar <%= i %>">
+                            </label>
+                        <% } %>
+                    </div>
+                    <div class="avatar-actions">
+                        <button type="submit" class="change-picture-button">Save</button>
+                        <button type="button" id="cancelAvatar" class="change-picture-button" style="background:#777">Cancel</button>
+                    </div>
+                </form>
             </div>
             <div class="profile-right">
                 <div class="profile-info-item">
@@ -57,5 +73,37 @@
         </div>
     <% } %>
 </div>
+
+<script>
+// Simple toggling and selection handling
+document.addEventListener('DOMContentLoaded', function () {
+  const changeBtn = document.getElementById('changePictureBtn');
+  const picker = document.getElementById('avatarPicker');
+  const cancelBtn = document.getElementById('cancelAvatar');
+  const pfpInput = document.getElementById('pfpInput');
+
+  if (changeBtn && picker) {
+    changeBtn.addEventListener('click', () => {
+      picker.style.display = (picker.style.display === 'block') ? 'none' : 'block';
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+      picker.style.display = 'none';
+    });
+  }
+
+  // When a radio changes, update hidden pfp value and selected border
+  picker?.addEventListener('change', (e) => {
+    if (e.target && e.target.name === 'pfpChoice') {
+      pfpInput.value = e.target.value;
+      document.querySelectorAll('.avatar-option').forEach(el => el.classList.remove('selected'));
+      const label = e.target.closest('.avatar-option');
+      label?.classList.add('selected');
+    }
+  });
+});
+</script>
 </body>
 </html>
