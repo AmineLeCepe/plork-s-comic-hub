@@ -77,7 +77,15 @@
 
                             <div class="chapter-info">
                                 <a class="chapter-link" href="/chapter?chapterid=<%= chapter._id %>">
-                                    <h3><%= chapter.title %></h3>
+                                    <h3>
+                                        <%= chapter.title %>
+                                        <% if (chapter.paywalled) { %>
+                                            <span class="badge badge-paywalled" title="Paywalled">💲</span>
+                                        <% } %>
+                                        <% if (chapter.nsfw) { %>
+                                            <span class="badge badge-nsfw" title="NSFW">18+</span>
+                                        <% } %>
+                                    </h3>
                                     <p>Chapter <%= chapter.chapterNumber %></p>
                                 </a>
                                 <% if (chapter.releaseDate) { %>
@@ -87,6 +95,14 @@
                                 <!-- inline edit form (hidden by default) -->
                                 <form id="edit-<%= chapter._id %>" class="inline-edit-form" action="/chapter/<%= chapter._id %>/title" method="post">
                                     <input type="text" name="title" value="<%= chapter.title %>" required>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="paywalled" <%= chapter.paywalled ? 'checked' : '' %> />
+                                        Paywalled
+                                    </label>
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" name="nsfw" <%= chapter.nsfw ? 'checked' : '' %> />
+                                        NSFW
+                                    </label>
                                     <button type="submit" class="save-btn">Save</button>
                                     <button type="button" class="cancel-btn light js-cancel-edit" data-target="edit-<%= chapter._id %>">Cancel</button>
                                 </form>
