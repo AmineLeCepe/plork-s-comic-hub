@@ -60,7 +60,7 @@ async function chapterGet(req, res, next) {
 
         // Fetch comments for this chapter
         const comments = await Comment.find({ chapter: chapterId })
-            .populate('user', 'username avatar')
+            .populate('user', 'username pfp')
             .sort({ createdAt: -1 })
             .lean();
 

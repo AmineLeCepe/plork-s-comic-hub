@@ -95,9 +95,17 @@ body, .main-content {
     padding: 12px 0;
     border-bottom: 1px solid #f0f0f0;
 }
-
+/* ... existing code ... */
 .comment-item:last-child {
     border-bottom: none;
+}
+
+/* Use a 2-column layout: avatar | content */
+.comment-item {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    column-gap: 10px;
+    align-items: start;
 }
 
 .comment-header {
@@ -105,6 +113,7 @@ body, .main-content {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 4px;
+    grid-column: 2; /* header goes in content column */
 }
 
 .comment-author {
@@ -114,10 +123,12 @@ body, .main-content {
 }
 
 .comment-avatar {
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
     object-fit: cover;
+    grid-column: 1; /* avatar stays in first column */
+    grid-row: 1 / span 2; /* span header + text rows */
 }
 
 .comment-username {
@@ -131,10 +142,12 @@ body, .main-content {
 }
 
 .comment-text {
-    margin: 4px 0 0 36px; /* indent under avatar */
+    margin: 0; /* remove indent, it aligns with username via grid */
     color: #333;
     white-space: pre-wrap;
+    grid-column: 2; /* text in content column */
 }
+/* ... existing code ... */
 
 .comment-form-wrap {
     margin-top: 16px;
@@ -149,6 +162,7 @@ body, .main-content {
     font-size: 0.95rem;
     outline: none;
 }
+/* ... existing code ... */
 
 .comment-form textarea:focus {
     border-color: #bbb;
